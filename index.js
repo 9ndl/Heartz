@@ -6,7 +6,7 @@ const logger = require('morgan');              // Logs requests & responses
 const createError = require('http-errors');
 
 let app = express();
-
+//here is the directory for the router files
 let userRouter = require('./routes/users');
 let deviceRouter = require('./routes/devices');
 
@@ -35,7 +35,7 @@ app.use(cookieParser());
 
 // Static file hosting
 app.use(express.static('public'));
-
+//here add the routes files
 //app.use('/users', userRouter);
 //app.use('/devices', deviceRouter);
 
