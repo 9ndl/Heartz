@@ -15,10 +15,12 @@ function sendSigninRequest() {
               //call fail function upon failuare
             .fail(signinFailure);
     }else if(!(emailReg.test($('#email').val()))){
+        $("#failMessage1").hide();
         $("#failMessage").text("Invalid or missing email address.");
         $("#failMessage").css({color: "red"});
         $("#failMessage").show();
     }else if($('#password').val()==""){
+        $("#failMessage").hide();
         $("#failMessage1").text("Enter password please.");
         $("#failMessage1").css({color: "red"});
         $("#failMessage1").show();
