@@ -1,5 +1,5 @@
-//data base access
+var mongoose = require("mongoose");
 
-//wejknglwebhgr
+mongoose.connect("mongodb://localhost/db20", { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
 
-//Test
+module.exports = mongoose;
