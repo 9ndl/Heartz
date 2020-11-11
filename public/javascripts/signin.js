@@ -1,7 +1,9 @@
 function sendSigninRequest() {
     
     let emailReg = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,5}$/;
-    if(emailReg.test($('#email').val())){
+    if(emailReg.test($('#email').val()) && $('#password').val()!=""){
+        $("#failMessage1").hide();
+        $("#failMessage").hide();
         $.ajax({
             url: '/users/signin',
             method: 'POST',
@@ -12,15 +14,15 @@ function sendSigninRequest() {
             .done(signinSuccess)
               //call fail function upon failuare
             .fail(signinFailure);
-    }else{
+    }else if(!(emailReg.test($('#email').val()))){
         $("#failMessage").text("Invalid or missing email address.");
         $("#failMessage").css({color: "red"});
         $("#failMessage").show();
+    }else if($('#password').val()==""){
+        $("#failMessage1").text("Enter password please.");
+        $("#failMessage1").css({color: "red"});
+        $("#failMessage1").show();
     }
-    //console.log({ email: $('#email').val(), password: $('#password').val() });
-
-    //call to sign in 
-    
   }
     //function for seccuss
   function signinSuccess(data, testStatus, jqXHR) {
@@ -33,14 +35,15 @@ function sendSigninRequest() {
   function signinFailure(jqXHR, testStatus, errorThrown) {
       //check status to find the error code
     if (jqXHR.status == 401 ) {
-       $('#ServerResponse').html("<span class='red-text text-darken-2'>Error: " +
+        //<span class='red-text text-darken-2'>Error:
+       $('#ServerResponse').html("<span class='red-text'>Error: " +
                                  jqXHR.responseJSON.message +"</span>");
         //show the message
         $('#ServerResponse').show();
     }
     else {
         // error is server couldnt be reached
-       $('#ServerResponse').html("<span class='red-text text-darken-2'>Server could not be reached.</span>");
+       $('#ServerResponse').html("<span class='red-text'>Server could not be reached.</span>");
        $('#ServerResponse').show();
     }
   }

@@ -15,7 +15,7 @@
    padding-top: 5px;
 }
 
-#addDeviceForm, #main, #error,#failMessage {
+#addDeviceForm, #main, #error,#failMessage, #failMessage1 {
    display: none;
 }
 
