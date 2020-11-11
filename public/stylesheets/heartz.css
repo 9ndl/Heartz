@@ -4,14 +4,15 @@
     background-color: grey;
 }
 
-#logo {
+/*#logo {
     margin: 5px;
     width: 50px;
-}
+}*/
 
 #name {
     font-size: 32pt;
     vertical-align: top;
+    padding-left: 10pt;
 }
 
 #account {
