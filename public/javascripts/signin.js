@@ -1,5 +1,5 @@
 function sendSigninRequest() {
-    
+    //validation email.
     let emailReg = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,5}$/;
     if(emailReg.test($('#email').val()) && $('#password').val()!=""){
         $("#failMessage1").hide();
