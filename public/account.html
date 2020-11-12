@@ -24,11 +24,11 @@
 
 <body>
   <!-- Dropdown Structure -->
-  <ul id='dropdown1' class='dropdown-content' class="large arrow_drop_down">
-    <li><a href="account.html">Home</a></li>
-      <li><a href="recentpotholes.html">Recent</a></li>
+  <ul id='dropdown1' class='dropdown-content'>
+    <li><a href="account.html"><i class="material-icons black-text" id="optionsIcons1">home</i><span class="black-text">Home</span></a></li>
+    <!--<li><a href="#!">Recent</a></li>-->
     <li class="divider"></li>
-    <li><a href="#!" id="signout">Sign out</a></li>
+    <li><a href="#!" id="signout"><i class="material-icons black-text" id="optionsIcons2">exit_to_app</i><span class="black-text">Sign Out</span></a></li>
   </ul>
   
   <nav>
@@ -37,7 +37,7 @@
       <a href="account.html" class="brand-logo left"><img id="logo" src="images/logo.png"><span id="name">Heartz</span></a>
       <ul class="right ">
         <!-- Dropdown Trigger -->
-        <li><a class='dropdown-trigger btn' href='#' data-target='dropdown1'><i class="material-icons">more_vert</i></a></li>
+        <li><a class='dropdown-trigger black btn' href='#' data-target='dropdown1'><i id="icon" class="material-icons black">arrow_drop_down_circle</i></a></li>
       </ul>
     </div>
   </nav>
