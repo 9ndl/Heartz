@@ -42,7 +42,7 @@
 #optionsIcons1, #optionsIcons2 {
   font-size: 2.5rem;
 }
-#email:focus,#password:focus {
+#email:focus, #password:focus, #passwordConfirm:focus, #fullName:focus{
   border-bottom: 1px solid black;
   box-shadow: 0 1px 0 0 black;
 }
