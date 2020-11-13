@@ -2,18 +2,21 @@ function sendSigninRequest() {
     //validation email.
     let emailReg = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,5}$/;
     if(emailReg.test($('#email').val()) && $('#password').val()!=""){
-        $("#failMessage1").hide();
-        $("#failMessage").hide();
-        $.ajax({
-            url: '/users/signin',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ email: $('#email').val(), password: $('#password').val() }),
-            dataType: 'json'
-          })  //call function done upon succes 
-            .done(signinSuccess)
-              //call fail function upon failuare
-            .fail(signinFailure);
+       //hide messages 
+      $("#failMessage1").hide();
+      $("#failMessage").hide();
+      //call post
+      $.ajax({
+        url: '/users/signin',
+        method: 'POST',
+        contentType: 'application/json',
+        //data structure
+        data: JSON.stringify({ email: $('#email').val(), password: $('#password').val() }),
+        dataType: 'json'
+      })//call function done upon succes 
+        .done(signinSuccess)
+        //call fail function upon failuare
+        .fail(signinFailure);
     }else if(!(emailReg.test($('#email').val()))){
         $("#failMessage1").hide();
         $("#failMessage").text("Invalid or missing email address.");
@@ -28,10 +31,10 @@ function sendSigninRequest() {
   }
     //function for seccuss
   function signinSuccess(data, testStatus, jqXHR) {
-    console.log(data.authToken);
+    //store authentication token
     window.localStorage.setItem('authToken', data.authToken);
-    //window.location = "account.html";
-    window.replace("account.html");
+    window.location = "account.html";
+    //window.replace("account.html");
   }
     //function for failure
   function signinFailure(jqXHR, testStatus, errorThrown) {

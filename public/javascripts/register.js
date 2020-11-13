@@ -45,8 +45,7 @@ function sendRegisterRequest() {
   
   function registerSuccess(data, textStatus, jqXHR) {
     if (data.success) {  
-      console.log(data.message)
-      //window.location = "index.html";
+      window.location = "index.html";
     }
     else {
       $('#ServerResponse').html("<span class='red-text text-darken-2'>Error: " + data.message + "</span>");
