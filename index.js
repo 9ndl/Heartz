@@ -36,7 +36,7 @@ app.use(cookieParser());
 // Static file hosting
 app.use(express.static('public'));
 //here add the routes files
-//app.use('/users', userRouter);
+app.use('/users', userRouter);
 //app.use('/devices', deviceRouter);
 
 // Catch 404 and forward to error handler
