@@ -14,9 +14,10 @@ function sendAccountRequest() {
   }
   
   function accountInfoSuccess(data, textStatus, jqXHR) {
+    let date = new Date(data.lastAccess).toLocaleString();
     $('#email').html(data.email);
     $('#fullName').html(data.fullName);
-    $('#lastAccess').html(data.lastAccess);
+    $('#lastAccess').html(date);
     $('#main').show();
   
     // Add the devices to the list before the list item for the add device button (link)
