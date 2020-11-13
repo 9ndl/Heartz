@@ -4,7 +4,7 @@ let router = express.Router();
 let bcrypt = require("bcryptjs");
 let jwt = require("jwt-simple");
 let fs = require('fs');
-let User = require('../models/users');
+let User = require('../models/user');
 let Device = require('../models/device');
 // On Repl.it, add JWT_SECRET to the .env file, and use this code
 // let secret = process.env.JWT_SECRET
