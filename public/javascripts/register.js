@@ -9,6 +9,12 @@ function sendRegisterRequest() {
 
     // Check to make sure the passwords match
     // FIXME: Check to ensure strong password 
+    if (emailReg.test(email) && pwdReg.test(password) && password == passwordConfirm){
+      $('#failMessage1').hide();
+      $('#failMessage2').hide();
+      $('#failMessage3').hide();
+
+    }
     if (!emailReg.test(email)){
 
       $('#failMessage1').text("Invalid email address!");
