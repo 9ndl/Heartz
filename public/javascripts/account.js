@@ -1,3 +1,7 @@
+if (!window.localStorage.getItem("authToken")) {
+  window.location.replace("index.html");
+}
+
 function sendAccountRequest() {
     $.ajax({
       url: '/users/account',
