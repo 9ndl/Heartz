@@ -105,7 +105,7 @@ router.get('/account', function(req, res) {
                 res.status(200).json(accountInfo);
                 
            // Find devices based on decoded token
-           /*Device.find({ userEmail : decodedToken.email}, function(err, devices) {
+           Device.find({ userEmail : decodedToken.email}, function(err, devices) {
              if (!err) {
                for (device of devices) {
                  accountInfo['devices'].push({ deviceId: device.deviceId, apikey: device.apikey });
@@ -113,7 +113,7 @@ router.get('/account', function(req, res) {
              }
   
              res.status(200).json(accountInfo);
-           });*/
+           });
          }
        });
     }
