@@ -10,8 +10,9 @@ let Device = require("../models/device");
 
 // On AWS ec2, you can use to store the secret in a separate file. 
 // The file should be stored outside of your code directory. 
-let secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
-let particleAccessToken = fs.readFileSync(__dirname + '/../../particle_access_token').toString();
+//let secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
+let secret = "secret";
+//let particleAccessToken = fs.readFileSync(__dirname + '/../../particle_access_token').toString();
 
 // Function to generate a random apikey consisting of 32 characters
 function getNewApikey() {
@@ -69,7 +70,7 @@ router.post('/register', function(req, res, next) {
       return res.status(400).json(responseJson);
     }
     else {
-      // Get a new apikey
+      //Get a new apikey
 	   deviceApikey = getNewApikey();
 	    
 	    // Create a new device with specified id, user email, and randomly generated apikey.
@@ -96,7 +97,7 @@ router.post('/register', function(req, res, next) {
     }
   });
 });
-
+/*
 router.post('/ping', function(req, res, next) {
     let responseJson = {
         success: false,
@@ -137,6 +138,6 @@ router.post('/ping', function(req, res, next) {
         responseJson.message = "Device ID " + req.body.deviceId + " pinged.";
         return res.status(200).json(responseJson);
       });    
-});
+});*/
 
 module.exports = router;
