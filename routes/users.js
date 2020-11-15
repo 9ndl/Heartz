@@ -102,7 +102,7 @@ router.get('/account', function(req, res) {
                 accountInfo["lastAccess"] = user.lastAccess;
                 accountInfo["devices"] = [];   // Array of devices
                 //send info back
-                res.status(200).json(accountInfo);
+                //res.status(200).json(accountInfo);
                 
            // Find devices based on decoded token
            Device.find({ userEmail : decodedToken.email}, function(err, devices) {

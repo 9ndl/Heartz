@@ -26,6 +26,7 @@
     "fs": "^0.0.1-security",
     "jwt-simple": "^0.5.6",
     "mongoose": "^5.10.14",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "superagent": "^6.1.0"
   }
 }
