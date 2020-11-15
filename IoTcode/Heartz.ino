@@ -48,6 +48,7 @@ Timer schedulerTimer(10, simpleScheduler);
 
 void setup() {
    Serial.begin(115200);
+   pinMode(D7, OUTPUT);
    Serial.println("ECE 413/513 Photon and MAX30105 Test");
 
    // Sensor Initialization:  default I2C port, 400kHz speed
@@ -63,7 +64,7 @@ void setup() {
    heartSensor.setPulseAmplitudeRed(0x0A);
   
    // Turn off Green LED
-   heartSensor.setPulseAmplitudeGreen(0); 
+   //heartSensor.setPulseAmplitudeGreen(0); 
   
    // Starts the state machine scheduler timer.
    schedulerTimer.start();
@@ -90,9 +91,11 @@ void loop() {
 
 // When obtain response from the publish
 void myHandler(const char *event, const char *data) {
-  // Formatting output
-  String output = String::format("Response from Post:\n  %s\n", data);
-  // Log to serial console
-  Serial.println(output);
+    // Formatting output
+    String output = String::format("Response from Post:\n  %s\n", data);
+    // Log to serial console
+    Serial.println(output);
 }
+
+
 
