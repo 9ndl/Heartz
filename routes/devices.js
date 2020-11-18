@@ -97,6 +97,10 @@ router.post('/register', function(req, res, next) {
     }
   });
 });
+
+router.post('/readings', function(req, res, next){
+
+});
 /*
 router.post('/ping', function(req, res, next) {
     let responseJson = {

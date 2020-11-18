@@ -5,7 +5,8 @@ let deviceSchema = new db.Schema({
     apikey:       String,
     deviceId:     String,
     userEmail:    String,
-    lastContact:  { type: Date, default: Date.now }
+    lastContact:  { type: Date, default: Date.now },
+    readings: []
 });
 
 let Device = db.model("Device", deviceSchema);
