@@ -6,7 +6,8 @@ let deviceSchema = new db.Schema({
     deviceId:     String,
     userEmail:    String,
     lastContact:  { type: Date, default: Date.now },
-    readings: []
+    BPMreadings: [],
+    O2readings: []
 });
 
 let Device = db.model("Device", deviceSchema);
