@@ -100,7 +100,9 @@ router.get('/account', function(req, res) {
                 accountInfo["email"] = user.email;
                 accountInfo["fullName"] = user.fullName;
                 accountInfo["lastAccess"] = user.lastAccess;
-                accountInfo["devices"] = [];   // Array of devices
+                accountInfo["devices"] = [];// Array of devices
+                accountInfo["BPMResults"]= [];
+                accountInfo["OXResults"] = [];
                 //send info back
                 //res.status(200).json(accountInfo);
                 
@@ -109,6 +111,8 @@ router.get('/account', function(req, res) {
               if (!err) {
                 for (device of devices) {
                   accountInfo['devices'].push({ deviceId: device.deviceId, apikey: device.apikey });
+                  accountInfo["BPMResults"].push(device.BPMreadings);
+                  accountInfo["OXResults"].push(device.O2readings);
                 }
              }
   

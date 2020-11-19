@@ -80,8 +80,8 @@ router.post('/register', function(req, res, next) {
       let newDevice = new Device({
         deviceId: req.body.deviceId,
         userEmail: email,
-        BPMreadings: ["000BPM"],
-        O2readings:  ["999%"],
+        BPMreadings: ["000BPM","000BPM","000BPM"],
+        O2readings:  ["999%","999%","999%"],
         apikey: deviceApikey
       });
 
