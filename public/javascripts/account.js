@@ -106,12 +106,12 @@ function sendAccountRequest() {
   }
   
   $(function() {
-   /* if (!window.localStorage.getItem("authToken")) {
+   if (!window.localStorage.getItem("authToken")) {
       window.location.replace("index.html");
     }
-    else {*/
+    else {
       sendAccountRequest();
-   // }
+    }
   
     // Register event listeners
     $("#addDevice").click(showAddDeviceForm);
