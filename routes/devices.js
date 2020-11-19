@@ -97,8 +97,49 @@ router.post('/register', function(req, res, next) {
     }
   });
 });
+//route for the publishing the readings from the device
+router.post('/report', function(req, res, next){
+  let responseJson = {
+    registered: false,
+    message : "",
+    apikey : "none",
+    deviceId : "none"
+  };  
+  // Ensure the request includes the deviceId parameter
+  if( !req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing deviceId.";
+    return res.status(401).json(responseJson);
+  }
+  //Check if there is apikey
+  if( !req.body.hasOwnProperty("apikey")) {
+    responseJson.message = "Missing apikey.";
+    return res.status(401).json(responseJson);
+  }
+  //check if there is readings to register 
+  if( !req.body.hasOwnProperty("avgBPM")) {
+    responseJson.message = "Missing avgBPM.";
+    return res.status(401).json(responseJson);
+  }
 
-router.post('/readings', function(req, res, next){
+  Device.findOne({ deviceId: req.body.deviceId}, function(err, device){
+    if(err){//error contacting the data base
+      res.status(401).json({ success: false, message: "Can't connect to DB." });
+    }//when the device id doesnt exists in the data base
+    else if(!device){
+      res.status(401).json({ success: false, message: "Device with this ID is not registered in the data base" });
+    }//the device exists and found
+    else if(device.apikey != req.body.apikey){
+      res.status(401).json({ success: false, message: "apikey is wrong!" });
+    }else {
+      device.BPMreadings.push(req.body.avgBPM);
+      let options ={//dont creat new document if no document match
+        upsert: no
+      }
+      Device.replaceOne({deviceId: req.body.deviceId}, device, options);
+      res.status(201).json({ success: true, message: "Server received the readings ("+req.body.avgBPM+")."});
+    }
+
+  });
 
 });
 /*
