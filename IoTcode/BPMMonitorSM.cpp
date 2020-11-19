@@ -47,7 +47,7 @@ void BPMMonitorSM::execute() {
                 if (tick == 50) {
                     tick = 0;
                     //digitalWrite(led, LOW);
-                    Serial.println("No finger deteced.");
+                    Serial.println("No finger detected.");
                 }
             }
             else if (checkForBeat(irValue) == true)  {
