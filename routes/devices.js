@@ -72,11 +72,16 @@ router.post('/register', function(req, res, next) {
     else {
       //Get a new apikey
 	   deviceApikey = getNewApikey();
-	    
+      /*let fakeBPMReadings = [];
+      let fakeOXReadings = [];
+      fakeBPMReadings.push("000BPM");
+      fakeOXReadings.push("999%");*/
 	    // Create a new device with specified id, user email, and randomly generated apikey.
       let newDevice = new Device({
         deviceId: req.body.deviceId,
         userEmail: email,
+        BPMreadings: ["000BPM"],
+        O2readings:  ["999%"],
         apikey: deviceApikey
       });
 
