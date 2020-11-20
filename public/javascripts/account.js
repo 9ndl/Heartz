@@ -24,7 +24,7 @@ function sendAccountRequest() {
     for (let device of data.devices) {
       $("#addDeviceForm").before("<li class='collection-item'>ID: " +
         device.deviceId + ", APIKEY: " + device.apikey + 
-        " <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn ping'>Ping</button> " +
+        " <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn black ping'>Ping</button> " +
         " </li>");
       $("#ping-"+device.deviceId).click(function(event) {
         pingDevice(event, device.deviceId);
@@ -33,7 +33,7 @@ function sendAccountRequest() {
     console.log(data.BPMResults);
     console.log(data.OXResults);
     console.log(data.BPMResults.length);
-    if(data.BPMResults.lenght>=0){
+    if(data.BPMResults.length>0){
       $("#Results").show();
       for( let i = 0; i< data.BPMResults.length;++i){
         $("#tableReadings").append("<tr><td>"+data.BPMResults[i]+"</td><td>"+data.OXResults[i]+"</td></tr>");
