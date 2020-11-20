@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include <vector>
 #include <Particle.h>
+#include "spo2_algorithm.h"
 
 //-------------------------------------------------------------------
 
@@ -13,7 +14,7 @@ using namespace std;
 
 //-------------------------------------------------------------------
 
-BPMMonitorSM::BPMMonitorSM(MAX30105 &mySensor) : heartSensor(mySensor){
+BPMMonitorSM::BPMMonitorSM(MAX30105 mySensor) : heartSensor(mySensor){
     state = BPMMonitorSM::S_Init;
     //beatsPerMinute = 0.0;
     inProgress = true;
