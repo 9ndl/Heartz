@@ -86,7 +86,7 @@ void BPMMonitorSM::execute() {
             break;
             
         case BPMMonitorSM::S_ReadSensor:
-
+            Serial.println("Reading");
             //Continuously taking samples from MAX30102.  Heart rate and SpO2 are calculated every 1 second
             //dumping the first 25 sets of samples in the memory and shift the last 75 sets of samples to the top
             for (byte i = 25; i < 100; i++)
@@ -182,7 +182,7 @@ void BPMMonitorSM::execute() {
             sampleReported = true;
             heartRateHist.clear();
             spo2Hist.clear();
-            state = BPMMonitorSM::S_Init;
+            state = BPMMonitorSM::S_CheckRemindTime;
             break;
         case BPMMonitorSM::S_CheckRemindTime:
             Serial.println("RemindLoop");
