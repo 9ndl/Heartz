@@ -5,7 +5,7 @@ function sendRegisterRequest() {
     let passwordConfirm = $('#passwordConfirm').val();
     let emailReg = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,5}$/;
     let pwdReg =/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
-
+    
 
     // Check to make sure the passwords match
     // FIXME: Check to ensure strong password 
@@ -71,6 +71,9 @@ function sendRegisterRequest() {
   }
   
   $(function () {
+    if( window.localStorage.getItem("authToken") ) {
+      window.location.replace("account.html");
+    }
     $('#signup').click(sendRegisterRequest);
   });
   

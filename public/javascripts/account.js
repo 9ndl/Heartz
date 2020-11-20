@@ -34,6 +34,7 @@ function sendAccountRequest() {
     console.log(data.OXResults);
     console.log(data.BPMResults.length);
     if(data.BPMResults.lenght!=0){
+      $("#Results").show();
       for( let i = 0; i< data.BPMResults.length;++i){
         $("#tableReadings").append("<tr><td>"+data.BPMResults[i]+"</td><td>"+data.OXResults[i]+"</td></tr>");
       }
