@@ -72,16 +72,15 @@ router.post('/register', function(req, res, next) {
     else {
       //Get a new apikey
 	   deviceApikey = getNewApikey();
-      /*let fakeBPMReadings = [];
-      let fakeOXReadings = [];
-      fakeBPMReadings.push("000BPM");
-      fakeOXReadings.push("999%");*/
+      //let fakeBPMReadings = ["000BPM","100BPM","200BPM"];
+      //let fakeOXReadings = ["999%","999%","999%"];
+      //console.log(fakeBPMReadings[0] + "fake BPM reading");
 	    // Create a new device with specified id, user email, and randomly generated apikey.
       let newDevice = new Device({
         deviceId: req.body.deviceId,
         userEmail: email,
-        BPMreadings: ["000BPM","000BPM","000BPM"],
-        O2readings:  ["999%","999%","999%"],
+        BPMreadings: ["000BPM","100BPM","200BPM"],
+        O2readings:  ["799%","899%","999%"],
         apikey: deviceApikey
       });
 
@@ -125,6 +124,10 @@ router.post('/report', function(req, res, next){
     responseJson.message = "Missing avgBPM.";
     return res.status(401).json(responseJson);
   }
+  if( !req.body.hasOwnProperty("avgO2")) {
+    responseJson.message = "Missing avgO2.";
+    return res.status(401).json(responseJson);
+  }
 
   Device.findOne({ deviceId: req.body.deviceId}, function(err, device){
     if(err){//error contacting the data base
@@ -137,11 +140,25 @@ router.post('/report', function(req, res, next){
       res.status(401).json({ success: false, message: "apikey is wrong!" });
     }else {
       device.BPMreadings.push(req.body.avgBPM);
+      device.O2readings.push(req.body.avgO2);
+      console.log(device.BPMreadings);
+      console.log(device.O2readings);
+      device.save(function (err, updatedDevice){
+        if(err){
+          res.status(401).json({ success: false, message: "Failed to save to data base"});
+        }else{
+          let index = updatedDevice.BPMreadings.length - 1;
+          res.status(201).json({ success: true, message: "updated to the data base ("+updatedDevice["BPMreadings"][index]+" & "+updatedDevice["O2readings"][index]+")"});
+        }
+        //console.log("New GPA: " + stu.gpa);
+      });
+      //Device.update({deviceId: req.body.deviceId}, { birthDate: new Date(1995, 11, 2) })
+     /*
       let options ={//dont creat new document if no document match
-        upsert: no
+        upsert: false
       }
-      Device.replaceOne({deviceId: req.body.deviceId}, device, options);
-      res.status(201).json({ success: true, message: "Server received the readings ("+req.body.avgBPM+")."});
+      Device.replaceOne({deviceId: req.body.deviceId}, device, options);*/
+      //res.status(201).json({ success: true, message: "Server received the readings ("+req.body.avgBPM+")."});
     }
 
   });

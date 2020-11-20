@@ -30,6 +30,14 @@ function sendAccountRequest() {
         pingDevice(event, device.deviceId);
       });
     }
+    console.log(data.BPMResults);
+    console.log(data.OXResults);
+    console.log(data.BPMResults.length);
+    if(data.BPMResults.lenght!=0){
+      for( let i = 0; i< data.BPMResults.length;++i){
+        $("#tableReadings").append("<tr><td>"+data.BPMResults[i]+"</td><td>"+data.OXResults[i]+"</td></tr>");
+      }
+    }
   }
   
   function accountInfoError(jqXHR, textStatus, errorThrown) {
