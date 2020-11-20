@@ -14,21 +14,23 @@ using namespace std;
 
 //-------------------------------------------------------------------
 
-BPMMonitorSM::BPMMonitorSM(MAX30105 mySensor) : heartSensor(mySensor){
+BPMMonitorSM::BPMMonitorSM(MAX30105 &mySensor) : heartSensor(mySensor){
     state = BPMMonitorSM::S_Init;
-    //beatsPerMinute = 0.0;
-    inProgress = true;
-    lastBeat = 0;
     sampleReported = false;
     led = D7;
     pinMode(led, OUTPUT);
+    tick2 = 0;
+    firstRemindFlag = true;
 }
 
 //-------------------------------------------------------------------
 
 void BPMMonitorSM::execute() {
+    uint32_t irValue;
+    String data = "";
     switch (state) {
         case BPMMonitorSM::S_Init:
+            Serial.println("Init");
             digitalWrite(led, LOW);
             tick = 0;
             sampleReported = false;
@@ -40,14 +42,25 @@ void BPMMonitorSM::execute() {
             bufferLength = 100; //buffer length of 100 stores 4 seconds of samples running at 25sps
 
             //read the first 100 samples, and determine the signal range
-            for (byte i = 0 ; i < bufferLength ; ++i)
+            for (int i = 0 ; i < bufferLength ; ++i)
             {
-                while (particleSensor.available() == false) //do we have new data?
-                particleSensor.check(); //Check the sensor for new data
+                while (heartSensor.available() == false) //do we have new data?
+                heartSensor.check(); //Check the sensor for new data
 
-                redBuffer[i] = particleSensor.getRed();
-                irBuffer[i] = particleSensor.getIR();
-                if (!checkForBeat(irBuffer[i])){
+                redBuffer[i] = heartSensor.getRed();
+                irBuffer[i] = heartSensor.getIR();
+                Serial.print("i: ");
+                Serial.println(i);
+                Serial.print("IR: ");
+                Serial.println(irBuffer[i]);
+                if (irBuffer[i] < 5000){
+                    
+                    Serial.print("i: ");
+                    Serial.println(i);
+                    Serial.print("IR: ");
+                    Serial.println(irBuffer[i]);
+                    Serial.print("invalids: ");
+                    Serial.println(invalidCount);
                     --i;
                     ++invalidCount;
                     if (invalidCount >= 50){
@@ -55,18 +68,20 @@ void BPMMonitorSM::execute() {
                         Serial.println("No finger detected.");
                         return;
                     }
-                    else {
-                    invalidCount = 0;
-                    }  
                 }
-                particleSensor.nextSample(); //We're finished with this sample so move to next sample
+                else {
+                    invalidCount = 0;
+                }
+                heartSensor.nextSample(); //We're finished with this sample so move to next sample
             }
 
             //calculate heart rate and SpO2 after first 100 samples (first 4 seconds of samples)
             maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
-
-            heartRateHist.push_back(heartRate);
-            spo2Hist.push_back(spo2);
+            
+            if (validHeartRate && validSPO2){
+                heartRateHist.push_back(heartRate);
+                spo2Hist.push_back(spo2);
+            }
 
             break;
             
@@ -83,14 +98,20 @@ void BPMMonitorSM::execute() {
             //take 25 sets of samples before recalculating the heart rate.
             for (byte i = 75; i < 100; i++)
             {
-                while (particleSensor.available() == false) //do we have new data?
-                    particleSensor.check(); //Check the sensor for new data
+                while (heartSensor.available() == false) //do we have new data?
+                    heartSensor.check(); //Check the sensor for new data
 
-                digitalWrite(readLED, !digitalRead(readLED)); //Blink onboard LED with every data read
+                //digitalWrite(readLED, !digitalRead(readLED)); //Blink onboard LED with every data read
 
-                redBuffer[i] = particleSensor.getRed();
-                irBuffer[i] = particleSensor.getIR();
-                if (!checkForBeat(irBuffer[i])){
+                redBuffer[i] = heartSensor.getRed();
+                irBuffer[i] = heartSensor.getIR();
+                if (irBuffer[i] < 5000){
+                    Serial.print("i: ");
+                    Serial.println(i);
+                    Serial.print("IR: ");
+                    Serial.println(irBuffer[i]);
+                    Serial.print("invalids: ");
+                    Serial.println(invalidCount);
                     --i;
                     ++invalidCount;
                     if (invalidCount >= 50){
@@ -102,11 +123,12 @@ void BPMMonitorSM::execute() {
                 else {
                     invalidCount = 0;
                 }
-                particleSensor.nextSample(); //We're finished with this sample so move to next sample
+                heartSensor.nextSample(); //We're finished with this sample so move to next sample
             }
             maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
 
-            if (heartRateHist.size() < 3){
+            if (heartRateHist.size() < 3 && validHeartRate && validSPO2){
+                Serial.println("Saved");
                 heartRateHist.push_back(heartRate);
                 spo2Hist.push_back(spo2);
             }
@@ -116,66 +138,67 @@ void BPMMonitorSM::execute() {
 
             Serial.println("Blood Oxygen Level: ");
             Serial.print(spo2);
-            Serial.print("%");
-            if (bpmHistory.size() == 3 && !sampleReported) {
+            Serial.println("%");
+            Serial.println(heartRateHist.size());
+            if (heartRateHist.size() == 3 && !sampleReported) {
                 state = BPMMonitorSM::S_Report;
                 return;
             }
             state = BPMMonitorSM::S_ReadSensor;
             break;
         case BPMMonitorSM::S_Reminder:
-            tick2 = 0;
             ++tick2;
             if((tick2 == 10) && (flag == 1)){
                 flag = 0;
                 tick2 = 0;
                 digitalWrite(led, HIGH);
-                //Serial.println("High");
             }
             if ((tick2 == 10) && (flag == 0)){
                 flag = 1;
                 tick2 = 0;
                 digitalWrite(led, LOW);
-                //Serial.println("Low");
             }
 
-            uint32_t irValue = heartSensor.getIR();
-            if (checkForBeat(irValue)) {
+            irValue = heartSensor.getIR();
+            if (irValue >= 5000) {
                 delay(200);
                 irValue = heartSensor.getIR();
-                if (checkForBeat(irValue)){
+                if (irValue >= 5000){
                     state = S_Init;
+                    return;
                 }
             }
             
             state = BPMMonitorSM::S_Reminder;
             break;
         case BPMMonitorSM::S_Report:
+            Serial.println("Report");
             avgBPM = (heartRateHist.at(0) + heartRateHist.at(1) + heartRateHist.at(2)) / 3.0;
-            avgSPO2 = (spo2Hist.at(0) + spo2Hist.at(1) + spo2Hist.at(2)) / 3.0;
-            data = String::format("{ \"avgBPM\": \"%f\", \"avgSPO2\": \"%f\", \"timestamp\": \"%d/%d/%d %d:%d:%d }", avgBPM, avgSPO2, month(), day(), year(), hour(), minute(), second());          
+            avgO2 = (spo2Hist.at(0) + spo2Hist.at(1) + spo2Hist.at(2)) / 3.0;
+            data = String::format("{ \"avgBPM\": \"%f\", \"avgO2\": \"%f\", \"timestamp\": \"%d/%d/%d %d:%d:%d\" }", avgBPM, avgO2, Time.month(), Time.day(), Time.year(), Time.hour(), Time.minute(), Time.second());          
             Serial.println(data);
             // Publish to webhook
             Particle.publish("bpm", data, PRIVATE);
             sampleReported = true;
-            //Serial.println("%d", sampleReported);
-            //bpmHistory.clear();
             heartRateHist.clear();
             spo2Hist.clear();
             state = BPMMonitorSM::S_Init;
             break;
         case BPMMonitorSM::S_CheckRemindTime:
-            if (sampleReported){
+            Serial.println("RemindLoop");
+            if (sampleReported || firstRemindFlag){
                 refTime = millis();
                 sampleReported = false;
+                firstRemindFlag = false;
             }
-            while((millis() - refTime) >= THIRTY_MINUTES_MILLIS){
-                uint32_t irValue = heartSensor.getIR();
-                if (checkForBeat(irValue)) {
+            while((millis() - refTime) < THIRTY_MINUTES_MILLIS){
+                irValue = heartSensor.getIR();
+                if (irValue >= 5000) {
                     delay(200);
                     irValue = heartSensor.getIR();
-                    if (checkForBeat(irValue)){
+                    if (irValue >= 5000){
                         state = S_Init;
+                        return;
                     }
                 }
             }
@@ -183,11 +206,3 @@ void BPMMonitorSM::execute() {
             break;
    }
 }
-
-//-------------------------------------------------------------------
-
-float BPMMonitorSM::getBPM() {
-    return beatsPerMinute;
-}
-
-//-------------------------------------------------------------------

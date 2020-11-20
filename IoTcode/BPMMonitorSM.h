@@ -12,7 +12,7 @@
 using namespace std;
 
 #define THIRTY_MINUTES_MILLIS 1000 * 60 * 30
-//#define THIRTY_MINUTES_MILLIS 5000
+//#define THIRTY_MINUTES_MILLIS 1000 * 60 * 2
 //-------------------------------------------------------------------
 class BPMMonitorSM {
     enum State { S_Init, S_CheckRemindTime, S_ReadSensor, S_Report, S_Reminder};
