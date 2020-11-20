@@ -5,18 +5,18 @@ function sendRegisterRequest() {
     let passwordConfirm = $('#passwordConfirm').val();
     let emailReg = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,5}$/;
     let pwdReg =/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
-    
+    let flag = 0;
 
     // Check to make sure the passwords match
     // FIXME: Check to ensure strong password 
-    if (emailReg.test(email) && pwdReg.test(password) && password == passwordConfirm){
+    //if (emailReg.test(email) && pwdReg.test(password) && password == passwordConfirm){
       $('#failMessage1').hide();
       $('#failMessage2').hide();
       $('#failMessage3').hide();
 
-    }
+    //}
     if (!emailReg.test(email)){
-
+      flag = 1;
       $('#failMessage1').text("Invalid email address!");
       $("#failMessage1").css({color: "red"});
       $('#failMessage1').show();
@@ -30,15 +30,15 @@ function sendRegisterRequest() {
                                 +"</ol>");
       $('#failMessage2').css({color: "red"});
       $("#failMessage2").show();
-      
+      flag = 1;
     }
     if (password != passwordConfirm) {
       $('#failMessage3').html("<span>Passwords do not match.</span>");
       $('#failMessage3').css({color: "red"});
       $('#failMessage3').show();
+      flag = 1 
     }
-    
-    $.ajax({
+    if(flag ==0 ){$.ajax({
       url: '/users/register',
       type: 'POST',
       contentType: 'application/json',
@@ -46,7 +46,8 @@ function sendRegisterRequest() {
       dataType: 'json'
     })
       .done(registerSuccess)
-      .fail(registerError);
+      .fail(registerError);}
+    
   }
   
   function registerSuccess(data, textStatus, jqXHR) {
