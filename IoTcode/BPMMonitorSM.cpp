@@ -137,15 +137,22 @@ void BPMMonitorSM::execute() {
                 digitalWrite(led, LOW);
                 //Serial.println("Low");
             }
-            
-            else{
-                state = BPMMonitorSM::S_Reminder;
+
+            uint32_t irValue = heartSensor.getIR();
+            if (checkForBeat(irValue)) {
+                delay(200);
+                irValue = heartSensor.getIR();
+                if (checkForBeat(irValue)){
+                    state = S_Init;
+                }
             }
+            
+            state = BPMMonitorSM::S_Reminder;
             break;
         case BPMMonitorSM::S_Report:
             avgBPM = (heartRateHist.at(0) + heartRateHist.at(1) + heartRateHist.at(2)) / 3.0;
             avgSPO2 = (spo2Hist.at(0) + spo2Hist.at(1) + spo2Hist.at(2)) / 3.0;
-            data = String::format("{ \"avgBPM\": \"%f\", \"avgSPO2\": \"%f\" }", avgBPM, avgSPO2);          
+            data = String::format("{ \"avgBPM\": \"%f\", \"avgSPO2\": \"%f\", \"timestamp\": \"%d/%d/%d %d:%d:%d }", avgBPM, avgSPO2, month(), day(), year(), hour(), minute(), second());          
             Serial.println(data);
             // Publish to webhook
             Particle.publish("bpm", data, PRIVATE);
@@ -164,8 +171,7 @@ void BPMMonitorSM::execute() {
             while((millis() - refTime) >= THIRTY_MINUTES_MILLIS){
                 uint32_t irValue = heartSensor.getIR();
                 if (checkForBeat(irValue)) {
-                    long t1 = millis();
-                    while((millis() - t1) < 200);
+                    delay(200);
                     irValue = heartSensor.getIR();
                     if (checkForBeat(irValue)){
                         state = S_Init;
