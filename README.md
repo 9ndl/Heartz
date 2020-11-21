@@ -27,6 +27,8 @@ This is the final project for ECE413 class
     - avgO2 : the average of three sets of oxygen level in percent.
     - timestamp : month/day/year hour/minute/second
 
+- Link to milestone demonstration video: https://youtu.be/AHiOMYyjRpY
+
 **Final Project**
 
 - Links to the pitch and demonstration videos.  
