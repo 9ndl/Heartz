@@ -1,9 +1,9 @@
 
 let db = require("../db");
-
+//fixed the unique values for apikey and deviceId
 let deviceSchema = new db.Schema({
-    apikey:       String,
-    deviceId:     String,
+    apikey:       { type: String, unique: true },
+    deviceId:     { type: String, unique: true },
     userEmail:    String,
     lastContact:  { type: Date, default: Date.now },
     BPMreadings: [String],
