@@ -16,7 +16,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   
   <link href="./stylesheets/heartz.css" rel="stylesheet">
-  <script src="./javascripts/account.js"></script>
   <script src="./javascripts/signout.js"></script>
 
   <!--Let browser know website is optimized for mobile-->
@@ -28,13 +27,12 @@
   <ul id='dropdown1' class='dropdown-content'>
     <li><a href="account.html"><i class="material-icons black-text" id="optionsIcons1">home</i><span class="black-text">Home</span></a></li>
     <li class="divider"></li>
-    <li><a href="data.html" id="data-viz"><i class="material-icons black-text" id="optionsIcons2">timeline</i><span class="black-text">Data</span></a></li>
+    <li><a href="#!" id="data-viz"><i class="material-icons black-text" id="optionsIcons2">timeline</i><span class="black-text">Data</span></a></li>
     <li class="divider"></li>
-    <li><a href="#!" id="signout"><i class="material-icons black-text" id="optionsIcons3">exit_to_app</i><span class="black-text">Sign Out</span></a></li>
+    <li><a href="account.html" id="signout"><i class="material-icons black-text" id="optionsIcons3">exit_to_app</i><span class="black-text">Sign Out</span></a></li>
   </ul>
   
   <nav>
-    <!--<div class="nav-wrapper blue-grey darken-2">-->
     <div class="nav-wrapper black">
       <a href="account.html" class="brand-logo left"><img id="logo" src="images/logo_white.png"><span id="name">Heartz</span></a>
       <ul class="right ">
@@ -81,24 +79,8 @@
           </thead>
   
           <tbody id="tableReadings">
-            <!--
-              <tr>
-              <td>Alvin</td>
-              <td>Eclair</td>
-              <td>$0.87</td>
-            </tr>
-            <tr>
-              <td>Alan</td>
-              <td>Jellybean</td>
-              <td>$3.76</td>
-            </tr>
-        <li class="collection-item" id="resultsFound">
-          li>Device ID:<span id="deviceIdResults"></span></li> 
-          <p>BPM:000 OX: 999%</p>
-        </li>-->
           </tbody>
       </ul>
-      <!--<div class='red-text text-darken-2' id="error"></div>-->
     </div>
   </div>
   
