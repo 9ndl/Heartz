@@ -8,7 +8,7 @@ let deviceSchema = new db.Schema({
     lastContact:  { type: Date, default: Date.now },
     BPMreadings: [String],
     O2readings: [String],
-    timeStamps: [Date]
+    timestamps: [Date]
 });
 
 let Device = db.model("Device", deviceSchema);

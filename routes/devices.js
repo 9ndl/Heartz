@@ -141,6 +141,7 @@ router.post('/report', function(req, res, next){
     }else {
       device.BPMreadings.push(req.body.avgBPM);
       device.O2readings.push(req.body.avgO2);
+      device.timestamps.push(new Date(req.body.timestamp));
       console.log(device.BPMreadings);
       console.log(device.O2readings);
       device.save(function (err, updatedDevice){
@@ -148,7 +149,7 @@ router.post('/report', function(req, res, next){
           res.status(401).json({ success: false, message: "Failed to save to data base"});
         }else{
           let index = updatedDevice.BPMreadings.length - 1;
-          res.status(201).json({ success: true, message: "updated to the data base ("+updatedDevice["BPMreadings"][index]+" & "+updatedDevice["O2readings"][index]+")"});
+          res.status(201).json({ success: true, message: "updated to the data base ("+updatedDevice["timestamps"][index].toString()+" & "+updatedDevice["BPMreadings"][index]+" & "+updatedDevice["O2readings"][index]+")"});
         }
         //console.log("New GPA: " + stu.gpa);
       });

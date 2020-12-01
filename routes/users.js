@@ -103,6 +103,7 @@ router.get('/account', function(req, res) {
                 accountInfo["devices"] = [];// Array of devices
                 accountInfo["BPMResults"]= [];
                 accountInfo["OXResults"] = [];
+                accountInfo["timestamps"] = [];
                 //send info back
                 //res.status(200).json(accountInfo);
                 
@@ -123,6 +124,7 @@ router.get('/account', function(req, res) {
                   }*/
                   accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
                   accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
+                  accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
                   //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
                   //console.log(device.O2readings[0]+"O2readings array exists");
                 }
