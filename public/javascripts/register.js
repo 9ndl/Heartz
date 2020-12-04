@@ -73,7 +73,7 @@ function sendRegisterRequest() {
   
   $(function () {
     if( window.localStorage.getItem("authToken") ) {
-      window.location.replace("account.html");
+      window.location.replace("home.html");
     }
     $('#signup').click(sendRegisterRequest);
   });

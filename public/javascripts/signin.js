@@ -33,8 +33,8 @@ function sendSigninRequest() {
   function signinSuccess(data, testStatus, jqXHR) {
     //store authentication token
     window.localStorage.setItem('authToken', data.authToken);
-    window.location = "account.html";
-    //window.replace("account.html");
+    window.location = "home.html";
+    //window.replace("home.html");
   }
     //function for failure
   function signinFailure(jqXHR, testStatus, errorThrown) {
@@ -56,7 +56,7 @@ function sendSigninRequest() {
   $(function() {
       //this is when we start using authentication the if statement executes
     if( window.localStorage.getItem("authToken") ) {
-      window.location.replace("account.html");
+      window.location.replace("home.html");
     }
   
     $("#signin").click(sendSigninRequest);

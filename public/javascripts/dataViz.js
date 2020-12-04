@@ -1,4 +1,5 @@
-var Chart = require('chart.min.js');
+console.log("here");
+var Chart = require('chart.js');
 if (!window.localStorage.getItem("authToken")) {
     window.location.replace("index.html");
 }
@@ -16,7 +17,7 @@ function sendAccountRequest() {
 
 function accountInfoSuccess(data, textStatus, jqXHR) {
     $('#main').show();
-    let ctx = $("#bpmChart");
+    let ctx = document.getElementById('bpmChart').getContext('2d');
     var myChart = new Chart(ctx, {
         type: 'bar',
         data: {
