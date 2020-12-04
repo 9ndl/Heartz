@@ -102,7 +102,7 @@ router.get('/account', function(req, res) {
                 accountInfo["fullName"] = user.fullName;
                 accountInfo["lastAccess"] = user.lastAccess;
                 accountInfo["devices"] = [];// Array of devices
-                accountInfo["Readings"]= [Reading];
+                accountInfo["Readings"]= [];
                 accountInfo["OXResults"] = [];
                 accountInfo["timestamps"] = [];
                 //send info back
