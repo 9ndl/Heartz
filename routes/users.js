@@ -6,6 +6,7 @@ let jwt = require("jwt-simple");
 let fs = require('fs');
 let User = require('../models/user');
 let Device = require('../models/device');
+let Reading = require('../models/reading');
 // On Repl.it, add JWT_SECRET to the .env file, and use this code
 // let secret = process.env.JWT_SECRET
 
@@ -101,12 +102,18 @@ router.get('/account', function(req, res) {
                 accountInfo["fullName"] = user.fullName;
                 accountInfo["lastAccess"] = user.lastAccess;
                 accountInfo["devices"] = [];// Array of devices
-                accountInfo["BPMResults"]= [];
+                accountInfo["Readings"]= [Reading];
                 accountInfo["OXResults"] = [];
                 accountInfo["timestamps"] = [];
                 //send info back
                 //res.status(200).json(accountInfo);
-                
+                Reading.find({userEmail: decodedToken.email}, function(err, allReadings){
+                  if(!err){
+                    //console.log(allReadings[0].userEmail);
+                    accountInfo.Readings = allReadings;
+                    //console.log(accountInfo.Readings[0].userEmail);
+                  }
+                });
            // Find devices based on decoded token
            Device.find({ userEmail : decodedToken.email}, function(err, devices) {
               if (!err) {
@@ -122,9 +129,9 @@ router.get('/account', function(req, res) {
                     console.log(OXread);
                     console.log("OXread loop");
                   }*/
-                  accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
-                  accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
-                  accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
+                  //accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
+                  //accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
+                  //accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
                   //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
                   //console.log(device.O2readings[0]+"O2readings array exists");
                 }
