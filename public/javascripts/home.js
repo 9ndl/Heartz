@@ -1,6 +1,6 @@
-if (!window.localStorage.getItem("authToken")) {
+/*if (!window.localStorage.getItem("authToken")) {
   window.location.replace("index.html");
-}
+}*/
 
 function sendAccountRequest() {
   $.ajax({
@@ -30,14 +30,18 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
       removeDevice(event, device.deviceId);
     });
   }
-  console.log(data.BPMResults);
-  console.log(data.OXResults);
-  console.log(data.BPMResults.length);
-  if(data.BPMResults.length>0){
+  //console.log(data.BPMResults);
+  //console.log(data.OXResults);
+  //console.log(data.BPMResults.length);
+  console.log(data.Readings.length);
+  if(data.Readings.length > 0){
     $("#Results").show();
-    for( let i = 0; i< data.BPMResults.length;++i){
-      $("#tableReadings").append("<tr><td>"+data.timestamps[i].toString()+"</td><td>"+data.BPMResults[i]+"</td><td>"+data.OXResults[i]+"</td></tr>");
+    for (let read of data.Readings){
+      $("#tableReadings").append("<tr><td>"+read.timestamp.toString()+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
     }
+    /*for( let i = 0; i< data.BPMResults.length;++i){
+      $("#tableReadings").append("<tr><td>"+data.timestamps[i].toString()+"</td><td>"+data.BPMResults[i]+"</td><td>"+data.OXResults[i]+"</td></tr>");
+    }*/
   }
 }
 
