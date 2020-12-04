@@ -24,7 +24,7 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
   for (let device of data.devices) {
     $("#addDeviceForm").before("<li class='collection-item'>ID: " +
       device.deviceId + ", APIKEY: " + device.apikey + 
-      " <button id='remove-" + device.deviceId + "' class='waves-effect waves-light btn black remove'>remove</button> " +
+      " <button id='remove-" + device.deviceId + "' class='waves-effect waves-light btn black inline-button'>remove</button> " +
       " </li>");
     $("#remove-"+device.deviceId).click(function(event) {
       removeDevice(event, device.deviceId);
@@ -73,7 +73,7 @@ function registerDevice() {
         $("#addDeviceForm").before("<li class='collection-item'>ID: " +
         $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
           //" <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn ping'>Ping</button> " +
-          " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn remove'>Remove</button> " +
+          " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn inline-button'>Remove</button> " +
           "</li>");
         $("#remove-"+$("#deviceId").val()).click(function(event) {
           //pingDevice(event, $("#deviceId").val());

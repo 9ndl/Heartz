@@ -15,7 +15,7 @@
    padding-top: 5px;
 }
 
-#addDeviceForm, #main, #error,#failMessage, #failMessage1,#failMessage2,#failMessage3, #Results {
+#addDeviceForm, #changeNameForm, #main, #error,#failMessage, #failMessage1,#failMessage2,#failMessage3, #Results {
    display: none;
 }
 /*
@@ -31,7 +31,7 @@
    fill: white;
 } 
 
-.remove {
+.inline-button {
   margin-left: 20px;
 }
 
