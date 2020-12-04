@@ -4,6 +4,7 @@ let jwt = require("jwt-simple");
 let fs = require('fs');
 let superagent = require('superagent');
 let Device = require("../models/device");
+let Reading = require('../models/reading');
 
 // On Repl.it, add JWT_SECRET to the .env file, and use this code
 // let secret = process.env.JWT_SECRET
@@ -109,6 +110,7 @@ router.post('/report', function(req, res, next){
     apikey : "none",
     deviceId : "none"
   };  
+  let newReading = new Reading();
   // Ensure the request includes the deviceId parameter
   if( !req.body.hasOwnProperty("deviceId")) {
     responseJson.message = "Missing deviceId.";
@@ -129,6 +131,7 @@ router.post('/report', function(req, res, next){
     return res.status(401).json(responseJson);
   }
 
+
   Device.findOne({ deviceId: req.body.deviceId}, function(err, device){
     if(err){//error contacting the data base
       res.status(401).json({ success: false, message: "Can't connect to DB." });
@@ -139,17 +142,19 @@ router.post('/report', function(req, res, next){
     else if(device.apikey != req.body.apikey){
       res.status(401).json({ success: false, message: "apikey is wrong!" });
     }else {
-      device.BPMreadings.push(req.body.avgBPM);
-      device.O2readings.push(req.body.avgO2);
-      device.timestamps.push(new Date(req.body.timestamp));
-      console.log(device.BPMreadings);
-      console.log(device.O2readings);
-      device.save(function (err, updatedDevice){
+      newReading.deviceId = device.deviceId;
+      newReading.userEmail = device.userEmail;
+      newReading.BPMreading = req.body.avgBPM;
+      newReading.O2reading= req.body.avgO2;
+      newReading.timestamp = new Date(req.body.timestamp)
+      //console.log(newReading.BPMreading);
+      //console.log(newReading.O2reading);
+      newReading.save(function (err, savedReading){
         if(err){
           res.status(401).json({ success: false, message: "Failed to save to data base"});
         }else{
-          let index = updatedDevice.BPMreadings.length - 1;
-          res.status(201).json({ success: true, message: "updated to the data base ("+updatedDevice["timestamps"][index].toString()+" & "+updatedDevice["BPMreadings"][index]+" & "+updatedDevice["O2readings"][index]+")"});
+          res.status(201).json({ success: true, message: "updated to the data base ("+savedReading.timestamp+" & "+savedReading.BPMreading+" & "
+          +savedReading.O2reading + " &" + newReading.deviceId + newReading.userEmail+")"});
         }
         //console.log("New GPA: " + stu.gpa);
       });
@@ -178,7 +183,12 @@ router.post('/deregister', function(req, res, next){
     responseJson.message = "Missing deviceId.";
     return res.status(401).json(responseJson);
   }
-  
+  try {
+    
+  } catch (err) {
+    
+  }
+  //remove the device.
   Device.findOneAndRemove({ deviceId: req.body.deviceId}, function(err, device){
     if(err){//error contacting the data base
       res.status(401).json({ success: false, message: "Can't connect to DB." });
