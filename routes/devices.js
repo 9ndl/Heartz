@@ -165,6 +165,32 @@ router.post('/report', function(req, res, next){
   });
 
 });
+
+router.post('/deregister', function(req, res, next){
+  let responseJson = {
+    registered: false,
+    message : "",
+    apikey : "none",
+    deviceId : "none"
+  };
+
+  if( !req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing deviceId.";
+    return res.status(401).json(responseJson);
+  }
+  
+  Device.findOneAndRemove({ deviceId: req.body.deviceId}, function(err, device){
+    if(err){//error contacting the data base
+      res.status(401).json({ success: false, message: "Can't connect to DB." });
+    }//when the device id doesnt exists in the data base
+    else if(!device){
+      res.status(401).json({ success: false, message: "Device with this ID is not registered in the data base" });
+    }//the device exists and found
+    else{
+      res.status(201).json({ success: true, message: "Device " + req.body.deviceId + " deregistered"});
+    }
+  });
+});
 /*
 router.post('/ping', function(req, res, next) {
     let responseJson = {

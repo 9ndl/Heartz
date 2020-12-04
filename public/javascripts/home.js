@@ -24,10 +24,10 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
   for (let device of data.devices) {
     $("#addDeviceForm").before("<li class='collection-item'>ID: " +
       device.deviceId + ", APIKEY: " + device.apikey + 
-      " <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn black ping'>Ping</button> " +
+      " <button id='remove-" + device.deviceId + "' class='waves-effect waves-light btn black remove'>remove</button> " +
       " </li>");
-    $("#ping-"+device.deviceId).click(function(event) {
-      pingDevice(event, device.deviceId);
+    $("#remove-"+device.deviceId).click(function(event) {
+      removeDevice(event, device.deviceId);
     });
   }
   console.log(data.BPMResults);
@@ -68,10 +68,12 @@ function registerDevice() {
         // Add new device to the device list
         $("#addDeviceForm").before("<li class='collection-item'>ID: " +
         $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
-          " <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn ping'>Ping</button> " +
+          //" <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn ping'>Ping</button> " +
+          " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn remove'>Remove</button> " +
           "</li>");
-        $("#ping-"+$("#deviceId").val()).click(function(event) {
-          pingDevice(event, $("#deviceId").val());
+        $("#remove-"+$("#deviceId").val()).click(function(event) {
+          //pingDevice(event, $("#deviceId").val());
+          removeDevice(event, $("#deviceId").val());
         });
         hideAddDeviceForm();
       })
@@ -80,6 +82,24 @@ function registerDevice() {
         $("#error").html("Error: " + response.message);
         $("#error").show();
       }); 
+}
+
+function removeDevice(event, deviceId){
+  $.ajax({
+    url: '/devices/deregister',
+    type: 'POST',
+    headers: { 'x-auth': window.localStorage.getItem("authToken") },
+    data: { 'deviceId': deviceId},
+    responseType: 'json',
+    success: function(data, textStatus, jqXHR) {
+      console.log("Device " + deviceId + " has been deregistered");
+    },
+    error: function(jqXHR, textStatus, jqXHR){
+      var response = JSON.parse(jqXHR.responseText);
+      $("#error").html("Error: " + response.message);
+      $("#error").show();
+    }
+  })
 }
 
 function pingDevice(event, deviceId) {

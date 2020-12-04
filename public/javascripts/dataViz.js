@@ -97,10 +97,10 @@ function registerDevice() {
             // Add new device to the device list
             $("#addDeviceForm").before("<li class='collection-item'>ID: " +
             $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
-            " <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn ping'>Ping</button> " +
+            " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn remove'>Remove</button> " +
             "</li>");
-            $("#ping-"+$("#deviceId").val()).click(function(event) {
-            pingDevice(event, $("#deviceId").val());
+            $("#remove-"+$("#deviceId").val()).click(function(event) {
+            removeDevice(event, $("#deviceId").val());
             });
             hideAddDeviceForm();
         })
