@@ -105,13 +105,11 @@ router.get('/account', function(req, res) {
         accountInfo["Readings"]= [];
         accountInfo["OXResults"] = [];
         accountInfo["timestamps"] = [];
-        //send info back
-        //res.status(200).json(accountInfo);
+
         Reading.find({userEmail: decodedToken.email}, function(err, allReadings){
           if(!err){
             //console.log(allReadings[0].userEmail);
             accountInfo.Readings = allReadings;
-            //console.log(accountInfo.Readings[0].userEmail);
           }
         });
         // Find devices based on decoded token
@@ -119,57 +117,11 @@ router.get('/account', function(req, res) {
           if (!err) {
             for (device of devices) {
               accountInfo['devices'].push({ deviceId: device.deviceId, apikey: device.apikey });
-              /*for(BPMread of device.BPMreadings){
-                accountInfo["BPMResults"].push(BPMread);
-                console.log(BPMread);
-                console.log("bmread loop");
-              }
-              for(OXread of device.O2readings){
-                accountInfo["OXResults"].push(OXread);
-                console.log(OXread);
-                console.log("OXread loop");
-              }*/
-              //accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
-              //accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
-              //accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
-              //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
-              //console.log(device.O2readings[0]+"O2readings array exists");
             }
-            for(OXread of device.O2readings){
-              accountInfo["OXResults"].push(OXread);
-              console.log(OXread);
-              console.log("OXread loop");
-            }
-            accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
-            accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
-            accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
-            //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
-            //console.log(device.O2readings[0]+"O2readings array exists");
           }
-          for(OXread of device.O2readings){
-            accountInfo["OXResults"].push(OXread);
-            console.log(OXread);
-            console.log("OXread loop");
-          }
-          //accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
-          //accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
-          //accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
-          //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
-          //console.log(device.O2readings[0]+"O2readings array exists");
         });
-        for(OXread of device.O2readings){
-          accountInfo["OXResults"].push(OXread);
-          console.log(OXread);
-          console.log("OXread loop");
-        }
-        accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
-        accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
-        accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
-        //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
-        //console.log(device.O2readings[0]+"O2readings array exists");
       }
     });
-    //console.log(accountInfo["BPMResults"][0]+"before sending the response");
     res.status(200).json(accountInfo);
   }
   catch (ex) {
