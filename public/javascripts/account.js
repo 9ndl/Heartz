@@ -75,7 +75,8 @@ if (!window.localStorage.getItem("authToken")) {
         dataType: 'json'
         })
           .done(function (data, textStatus, jqXHR) {
-            $("#fullName").val() = newName;
+            //$("#fullName").val() = newName;
+            $("#fullName").text(newName);
             hideChangeNameForm();
           })
           .fail(function(jqXHR, textStatus, errorThrown) {
@@ -96,7 +97,64 @@ if (!window.localStorage.getItem("authToken")) {
     $("#changeNameForm").slideUp();   // Show the add device form
     $("#error").hide();
   }
+  function showChangePassForm(){
+    $("#changePasswordForm").slideDown();
+  }
+  function hideChangePassForm(){
+    $("#currPass").val("");
+    $("#newPass").val("");
+    $("#cnfPass").val("");
+    $("#failMessage1").slideUp();
+    $("#failMessage1").html("");
+    $("#failMessage2").slideUp();
+    $("#failMessage2").html("");
+    $("#changePasswordForm").slideUp();
+  }
+  function savePass(){
+    //let currPass = $("#currPass").val();
+    let newPass = $("#newPass").val();
+    let cnfPass = $("#cnfPass").val();
+    let flag = 0;
+    let passReg = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/; 
+    if(!passReg.test(newPass)){
+      flag = 1;
+      $('#failMessage1').html("<span>Password is not strong enough!"
+                                +"<ol><li>At least one capital letter</li>"
+                                +"<li>At least one lower case letter</li>"
+                                +"<li>At least one number</li>"
+                                +"<li>At least one lower special character</li>"
+                                +"</ol>");
+      $('#failMessage1').css({color: "red"});
+      $("#failMessage1").show();
+    }
+    if(newPass != cnfPass){
+      $('#failMessage2').html("<span>Passwords do not match.</span>");
+      $('#failMessage2').css({color: "red"});
+      $('#failMessage2').show();
+      flag = 1;
+    }
+    if (flag == 0){
+      $.ajax({
+        url: '/users/changepass',
+        type: 'POST',
+        headers: { 'x-auth': window.localStorage.getItem("authToken") },  
+        contentType: 'application/json',
+        data: JSON.stringify({ newPassword: newPass }), 
+        dataType: 'json'
+        })
+        .done(function(data, textStatus, jqXHR){
+          window.localStorage.removeItem("authToken");
+          window.location.replace("index.html");
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+          let response = JSON.parse(jqXHR.responseText);
+          $("#error").html("Error: " + response.message);
+          $("#error").show();
+        });
+    }
+  } 
   
+
   $(function() {
     if (!window.localStorage.getItem("authToken")) {
       window.location.replace("index.html");
@@ -108,5 +166,8 @@ if (!window.localStorage.getItem("authToken")) {
     // Register event listeners
     $("#changeName").click(showChangeNameForm); 
     $("#saveName").click(changeName);
-    $("#cancelName").click(hideChangeNameForm);  
+    $("#cancelName").click(hideChangeNameForm);
+    $("#changePass").click(showChangePassForm);
+    $("#cancelPass").click(hideChangePassForm);
+    $("#savePass").click(savePass);
   });

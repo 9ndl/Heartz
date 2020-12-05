@@ -5,7 +5,7 @@ let Device = require("./device");
 let userSchema = new db.Schema({
   email:        { type: String, required: true, unique: true },
   fullName:     { type: String, required: true },
-  passwordHash: String,
+  passwordHash: { type: String, required: true },
   lastAccess:   { type: Date, default: Date.now },
   userDevices:  [ String ]
 });

@@ -162,4 +162,48 @@ router.post('/update', function(req, res) {
   }
 });
 
+router.post('/changepass', function(req, res){
+  if (!req.headers["x-auth"]) {
+    res.status(401).json({ success: false, message: "No authentication token."});
+    return;
+  }
+  if( !req.body.hasOwnProperty("newPassword")) {
+    res.status(401).json({ success: false, message: "No password!!"});
+    return;
+  }
+  let authToken = req.headers["x-auth"];
+  //creat the info object
+  let accountInfo = { };
+  let decodedToken;
+  try {
+    decodedToken = jwt.decode(authToken, secret);
+    console.log(decodedToken.email);
+    console.log(req.body.newPassword);
+    bcrypt.hash(req.body.newPassword, 10, function(err, hash) {
+      if (err) {
+        res.status(400).json({success : false, message : err.errmsg});  
+      }
+      else {
+        User.update({email: decodedToken.email}, {$set:{passwordHash: hash}}, function(err, user){
+          if(err){
+            res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+            console.log(err.message);
+            return;
+          }else if(!user){
+            res.status(400).json({ success: false, message: "no user found!"});
+          }
+          else{
+            res.status(200).json({success: true, message:"Password has been updated"});
+            console.log(user);
+          }
+        });
+      }
+    });
+  } catch (err) {
+    // Token was invalid
+    res.status(401).json({ success: false, message: "Invalid authentication token."});
+    return;
+  }
+});
+
 module.exports = router;

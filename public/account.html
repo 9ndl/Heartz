@@ -55,8 +55,11 @@
           <h5>Account details</h5>
         </li>
         <li class="collection-item">Email: <span id="email"></span></li>
-        <li class="collection-item">Name: <span id="fullName"></span>
-          <button id="changeName" class="waves-effect waves-light black btn inline-button">Change</button>
+        <li class="collection-item">Name: <span id="fullName"></span></li>
+        <li class="collection-item">Last Access: <span id="lastAccess"></span></li>
+        <li class="collection-item">Update Profile
+          <button id="changeName" class="waves-effect waves-light black btn inline-button">Change Name</button>
+          <button id="changePass" class="waves-effect waves-light black btn inline-button">Change Password</button>
         </li>
         <li class="collection-item" id="changeNameForm">
           <label for="newName">Name:</label>
@@ -64,7 +67,18 @@
           <button id="saveName" class="waves-effect waves-light black btn">Save</button> 
           <button id="cancelName" class="waves-effect waves-light black btn">Cancel</button> 
         </li>
-        <li class="collection-item">Last Access: <span id="lastAccess"></span></li>
+        <li class="collection-item" id="changePasswordForm">
+          <!--<label for="currPass">Current Passowrd:</label>
+          <input type="password" id="currPass" name="currPass" col="30">-->
+          <label for="newPass">New Passowrd:</label>
+          <input type="password" id="newPass" name="newPass" col="30">
+          <span class="helper-text" data-error="wrong" data-success="right" id="failMessage1"></span>
+          <label for="cnfPass">Confirm Passowrd:</label>
+          <input type="password" id="cnfPass" name="cnfPass" col="30">
+          <span class="helper-text" data-error="wrong" data-success="right" id="failMessage2"></span><br>
+          <button id="savePass" class="waves-effect waves-light black btn">Save</button> 
+          <button id="cancelPass" class="waves-effect waves-light black btn">Cancel</button> 
+        </li>
       </ul>
       <div class='red-text text-darken-2' id="error"></div>
     </div>

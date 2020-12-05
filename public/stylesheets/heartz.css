@@ -15,7 +15,7 @@
    padding-top: 5px;
 }
 
-#addDeviceForm, #changeNameForm, #main, #error,#failMessage, #failMessage1,#failMessage2,#failMessage3, #Results {
+#addDeviceForm,#changePasswordForm, #changeNameForm, #main, #error,#failMessage, #failMessage1,#failMessage2,#failMessage3, #Results {
    display: none;
 }
 /*
