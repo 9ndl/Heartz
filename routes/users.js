@@ -102,7 +102,7 @@ router.post('/signin', function(req, res) {
                 accountInfo["fullName"] = user.fullName;
                 accountInfo["lastAccess"] = user.lastAccess;
                 accountInfo["devices"] = [];// Array of devices
-                accountInfo["Readings"]= [Reading];
+                accountInfo["Readings"]= [];
                 Reading.find({userEmail: decodedToken.email}, function(err, allReadings){
                   if(!err){
                     accountInfo.Readings = allReadings;
