@@ -12,7 +12,10 @@ using namespace std;
 //-------------------------------------------------------------------
 
 #define ONE_DAY_MILLIS (24 * 60 * 60 * 1000)
+#define THIRTY_MINUTES_MILLIS (1000 * 60 * 30)
+
 unsigned long lastSync = millis();
+
 
 //-------------------------------------------------------------------
 
@@ -68,6 +71,7 @@ void setup() {
    Serial.println("setup webhook");
    // Setup webhook subscribe
    Particle.subscribe("hook-response/bpm", myHandler, MY_DEVICES);
+   Particle.value()
 }
 
 //-------------------------------------------------------------------
