@@ -88,6 +88,7 @@ if (!window.localStorage.getItem("authToken")) {
 
   // Show add device form and hide the add device button (really a link)
   function showChangeNameForm() {
+    hideChangePassForm();
     $("#newName").val("");          // Clear the input for the device ID
     $("#changeNameForm").slideDown(); // Show the add device form
   }
@@ -98,6 +99,7 @@ if (!window.localStorage.getItem("authToken")) {
     $("#error").hide();
   }
   function showChangePassForm(){
+    hideChangeNameForm();
     $("#changePasswordForm").slideDown();
   }
   function hideChangePassForm(){
