@@ -6,6 +6,7 @@ function sendAccountRequest() {
   $.ajax({
     url: '/users/home', //used to be account
     method: 'GET',
+    //async: false, // for testing purposes
     headers: { 'x-auth' : window.localStorage.getItem("authToken") },
     dataType: 'json'
   })
@@ -18,7 +19,6 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
   $('#email').html(data.email);
   $('#fullName').html(data.fullName);
   $('#lastAccess').html(data.lastAccess);
-  $('#main').show();
   console.log(data.devices.length);
   // Add the devices to the list before the list item for the add device button (link)
   for (let device of data.devices) {
@@ -30,19 +30,22 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
       removeDevice(event, device.deviceId);
     });
   }
-  //console.log(data.BPMResults);
-  //console.log(data.OXResults);
-  //console.log(data.BPMResults.length);
   console.log(data.Readings.length);
   if(data.Readings.length > 0){
-    $("#Results").show();
+    let olddate = new Date(data.Readings[0].timestamp);
+    console.log(olddate);
+    let timestamp = Math.floor(olddate.getTime()/1000.0);
+    console.log(timestamp);
+    let newdate = new Date(timestamp*1000);
+    console.log(newdate);
+
     for (let read of data.Readings){
-      $("#tableReadings").append("<tr><td>"+read.timestamp.toString()+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
+      //console.log(read.timestamp.getTime());
+      $("#tableReadings").append("<tr><td>"+read.timestamp+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
     }
-    /*for( let i = 0; i< data.BPMResults.length;++i){
-      $("#tableReadings").append("<tr><td>"+data.timestamps[i].toString()+"</td><td>"+data.BPMResults[i]+"</td><td>"+data.OXResults[i]+"</td></tr>");
-    }*/
+    $("#Results").show();
   }
+  $('#main').show();
 }
 
 function accountInfoError(jqXHR, textStatus, errorThrown) {

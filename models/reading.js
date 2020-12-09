@@ -5,6 +5,7 @@ let readingSchema = new db.Schema({
     userEmail:    String,
     BPMreading:   String,
     O2reading:    String,
+    epochTime:    Number,
     timestamp:    Date
 });
 
