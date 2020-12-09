@@ -4,7 +4,7 @@
 
 function sendAccountRequest() {
   $.ajax({
-    url: '/users/account',
+    url: '/users/home', //used to be account
     method: 'GET',
     headers: { 'x-auth' : window.localStorage.getItem("authToken") },
     dataType: 'json'
@@ -19,7 +19,7 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
   $('#fullName').html(data.fullName);
   $('#lastAccess').html(data.lastAccess);
   $('#main').show();
-
+  console.log(data.devices.length);
   // Add the devices to the list before the list item for the add device button (link)
   for (let device of data.devices) {
     $("#addDeviceForm").before("<li class='collection-item'>ID: " +

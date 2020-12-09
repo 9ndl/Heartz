@@ -74,9 +74,48 @@ router.post('/signin', function(req, res) {
       }
     });
   });
-
-  // Access and Return account information
-  router.get('/account', function(req, res) {
+  // router for page account
+  router.get("/account",function(req, res){
+  // check if authtoken exists
+    if (!req.headers["x-auth"]) {
+      res.status(401).json({ success: false, message: "No authentication token."});
+      return;
+    }
+    //get the authtoken
+    let authToken = req.headers["x-auth"];
+    //creat the info object
+    let accountInfo = { };
+    try {
+      // Toaken decoded
+      let decodedToken = jwt.decode(authToken, secret);
+      //find the decoded email in the db
+      console.log(decodedToken.email);
+      User.findOne({email: decodedToken.email}, function(err, user) {
+        if (err) {
+          res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+        }
+        else if (!user){
+          console.log("user is not found");
+          res.status(400).json({ success: false, message: "user is not found"});
+        }
+        else{
+          //if found add info to the object
+          //console.log("user is found");
+          accountInfo["success"] = true;
+          accountInfo["email"] = user.email;
+          accountInfo["fullName"] = user.fullName;
+          accountInfo["lastAccess"] = user.lastAccess;
+          res.status(200).json(accountInfo);
+         }
+      });
+    }
+    catch (ex) {
+      // Token was invalid
+      res.status(401).json({ success: false, message: "Invalid authentication token."});
+    }
+  });
+  // Access and Return account information in home page
+  router.get('/home', function(req, res) {
     // check if authtoken exists
     if (!req.headers["x-auth"]) {
       res.status(401).json({ success: false, message: "No authentication token."});
@@ -91,33 +130,48 @@ router.post('/signin', function(req, res) {
         // Toaken decoded
         let decodedToken = jwt.decode(authToken, secret);
         //find the decoded email in the db
+        console.log(decodedToken.email);
         User.findOne({email: decodedToken.email}, function(err, user) {
           if (err) {
             res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
           }
+          else if (!user){
+            console.log("user is not found");
+            res.status(400).json({ success: false, message: "user is not found"});
+          }
           else{
-                //if found add info to the object 
+                //if found add info to the object
+                console.log("user is found");
                 accountInfo["success"] = true;
                 accountInfo["email"] = user.email;
                 accountInfo["fullName"] = user.fullName;
                 accountInfo["lastAccess"] = user.lastAccess;
                 accountInfo["devices"] = [];// Array of devices
                 accountInfo["Readings"]= [];
-                Reading.find({userEmail: decodedToken.email}, function(err, allReadings){
+                Reading.find({userEmail : decodedToken.email}, function(err, allReadings){
                   if(!err){
+                    console.log("readings are found");
+                    console.log(allReadings[0]);
                     accountInfo.Readings = allReadings;
+                    console.log(accountInfo.Readings[0]);
                   }
                 });
                 // Find devices based on decoded token
                 Device.find({ userEmail : decodedToken.email}, function(err, devices) {
                   if (!err) {
+                    console.log("All devices are found");
                     for (device of devices) {
-                      accountInfo['devices'].push({ deviceId: device.deviceId, apikey: device.apikey });
+                      accountInfo["devices"].push({ deviceId: device.deviceId, apikey: device.apikey });
+                      console.log(accountInfo.devices[0]);
                     }
                   }
-                //res.status(200).json(accountInfo);
+                  //console.log(accountInfo.Readings.length);
+                  //console.log(accountInfo.devices.length);
+                  res.status(200).json(accountInfo);
                 });
-              res.status(200).json(accountInfo);
+              //console.log(accountInfo.Readings.length);
+              //console.log(accountInfo.devices.length);
+              //res.status(200).json(accountInfo);
          }
        });
     }

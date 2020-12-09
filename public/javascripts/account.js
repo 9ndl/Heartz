@@ -4,7 +4,7 @@ if (!window.localStorage.getItem("authToken")) {
   
   function sendAccountRequest() {
     $.ajax({
-      url: '/users/account',
+      url: '/users/account', //same as the other one might need changing
       method: 'GET',
       headers: { 'x-auth' : window.localStorage.getItem("authToken") },
       dataType: 'json'
