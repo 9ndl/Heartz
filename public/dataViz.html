@@ -57,11 +57,21 @@
         <li class="collection-item" id="dailyData">
         </li>
       </ul>
-      <ul class="collection with-header" id="bpmResults">
+      <ul class="collection with-header" id="Results">
         <li class="collection-header">
-          <h5>BPM Data</h5>
+          <h5>Readings</h5>
         </li>
-        <li class="collection-item" id="bpmChartWrapper"><canvas id="bpmChart" width="400" height="400"></canvas></li>
+        <table class="responsive-table striped">
+          <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Beat/min</th>
+                <th>Oxygen Level</th>
+            </tr>
+          </thead>
+  
+          <tbody id="tableReadings">
+          </tbody>
       </ul>
     </div>
     <div class='red-text text-darken-2' id="error"></div>

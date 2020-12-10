@@ -32,16 +32,9 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
   }
   console.log(data.Readings.length);
   if(data.Readings.length > 0){
-    let olddate = new Date(data.Readings[0].timestamp);
-    console.log(olddate);
-    let timestamp = Math.floor(olddate.getTime()/1000.0);
-    console.log(timestamp);
-    let newdate = new Date(timestamp*1000);
-    console.log(newdate);
-
     for (let read of data.Readings){
-      //console.log(read.timestamp.getTime());
-      $("#tableReadings").append("<tr><td>"+read.timestamp+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
+      date = new Date(read.timestamp)
+      $("#tableReadings").append("<tr><td>"+date+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
     }
     $("#Results").show();
   }

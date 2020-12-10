@@ -116,74 +116,102 @@ router.get("/account",function(req, res){
   });
   // Access and Return account information in home page
 router.get('/home', function(req, res) {
-    // check if authtoken exists
-    if (!req.headers["x-auth"]) {
-      res.status(401).json({ success: false, message: "No authentication token."});
-      return;
-    }
-    //get the authtoken
-    let authToken = req.headers["x-auth"];
-    //creat the info object
-    let accountInfo = { };
-  
-    try {
-        // Toaken decoded
-        let decodedToken = jwt.decode(authToken, secret);
-        //find the decoded email in the db
-        //console.log(decodedToken.email);
-        User.findOne({email: decodedToken.email}, function(err, user) {
-          if (err) {
-            res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+  // check if authtoken exists
+  if (!req.headers["x-auth"]) {
+    res.status(401).json({ success: false, message: "No authentication token."});
+    return;
+  }
+  //get the authtoken
+  let authToken = req.headers["x-auth"];
+  //creat the info object
+  let accountInfo = { };
+
+  try {
+    // Toaken decoded
+    let decodedToken = jwt.decode(authToken, secret);
+    //find the decoded email in the db
+    //console.log(decodedToken.email);
+    User.findOne({email: decodedToken.email}, function(err, user) {
+      if (err) {
+        res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+      }
+      else if (!user){
+        //console.log("user is not found");
+        res.status(400).json({ success: false, message: "user is not found"});
+      }
+      else{
+        //if found add info to the object
+        //console.log("user is found");
+        //console.log(user.getTimestamp().toString());
+        accountInfo["success"] = true;
+        accountInfo["email"] = user.email;
+        accountInfo["fullName"] = user.fullName;
+        accountInfo["lastAccess"] = user.lastAccess;
+        accountInfo["devices"] = [];// Array of devices
+        accountInfo["Readings"]= [];
+        Reading.find({userEmail : decodedToken.email}, function(err, allReadings){
+          if(!err){
+            accountInfo.Readings = allReadings;
           }
-          else if (!user){
-            //console.log("user is not found");
-            res.status(400).json({ success: false, message: "user is not found"});
+        });
+        // Find devices based on decoded token
+        Device.find({ userEmail : decodedToken.email}, function(err, devices) {
+          if (!err) {
+            for (device of devices) {
+              accountInfo["devices"].push({ deviceId: device.deviceId, apikey: device.apikey });
+            }
           }
-          else{
-                //if found add info to the object
-                //console.log("user is found");
-                //console.log(user.getTimestamp().toString());
-                accountInfo["success"] = true;
-                accountInfo["email"] = user.email;
-                accountInfo["fullName"] = user.fullName;
-                accountInfo["lastAccess"] = user.lastAccess;
-                accountInfo["devices"] = [];// Array of devices
-                accountInfo["Readings"]= [];
-                Reading.find({userEmail : decodedToken.email}, function(err, allReadings){
-                  if(!err){
-                    //console.log("readings are found");
-                    //console.log(allReadings[0]);
-                    accountInfo.Readings = allReadings;
-                    //console.log(accountInfo.Readings[0]);
-                  }
-                });
-                // Find devices based on decoded token
-                Device.find({ userEmail : decodedToken.email}, function(err, devices) {
-                  if (!err) {
-                    //console.log("All devices are found");
-                    for (device of devices) {
-                      accountInfo["devices"].push({ deviceId: device.deviceId, apikey: device.apikey });
-                      //console.log(accountInfo.devices[0]);
-                    }
-                  }
-                  //console.log(accountInfo.Readings.length);
-                  //console.log(accountInfo.devices.length);
-                  res.status(200).json(accountInfo);
-                });
-              //console.log(accountInfo.Readings.length);
-              //console.log(accountInfo.devices.length);
-              //res.status(200).json(accountInfo);
-         }
-       });
-    }
-    catch (ex) {
-      // Token was invalid
-      res.status(401).json({ success: false, message: "Invalid authentication token."});
-    }
-  });
+          res.status(200).json(accountInfo);
+        });
+        //res.status(200).json(accountInfo);
+      }
+    });
+  }
+  catch (ex) {
+    // Token was invalid
+    res.status(401).json({ success: false, message: "Invalid authentication token."});
+  }
+});
 
 router.get("/visual", function(req, res){
   console.log("inside visual");
+  if (!req.headers["x-auth"]) {
+    res.status(401).json({ success: false, message: "No authentication token."});
+    return;
+  }
+  //get the authtoken
+  let authToken = req.headers["x-auth"];
+  //creat the info object
+  let visualsInfo = { };
+  let decodedToken
+  try {
+    // Toaken decoded
+    decodedToken = jwt.decode(authToken, secret);
+  }
+  catch (ex) {
+    // Token was invalid
+    res.status(401).json({ success: false, message: "Invalid authentication token."});
+    return;
+  }
+  let TimeStamp = Math.round(Date.now()/1000.0);
+    //console.log(TimeStamp);
+    //let TimeStamp = 
+    //find the decoded email in the db
+    Reading.find({userEmail: decodedToken.email,                  // 24hs
+                  epochTime: {$lt : TimeStamp, $gt : TimeStamp - 86400}}, function(err, allReadings) {
+      if (err) {
+        res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+      }
+      else if (!allReadings){
+        //console.log("user is not found");
+        res.status(400).json({ success: false, message: "No readings found"});
+      }
+      else{
+        visualsInfo["success"] = true;
+        visualsInfo["Readings"] = allReadings;
+        res.status(200).json(visualsInfo);
+      }
+    });
 });
 
 router.post('/update', function(req, res) {
