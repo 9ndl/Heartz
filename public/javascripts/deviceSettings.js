@@ -15,16 +15,13 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
     $('#fullName').html(data.fullName);
     $('#lastAccess').html(data.lastAccess);
     $('#main').show();
-  
+    
+    $("#deviceSelect").append('<option value="" disabled selected>Select a Device</option>');
     // Add the devices to the list before the list item for the add device button (link)
+    let i = 1;
     for (let device of data.devices) {
-      $("#addDeviceForm").before("<li class='collection-item'>ID: " +
-        device.deviceId + ", APIKEY: " + device.apikey + 
-        " <button id='remove-" + device.deviceId + "' class='waves-effect waves-light btn black inline-button'>remove</button> " +
-        " </li>");
-      $("#remove-"+device.deviceId).click(function(event) {
-        removeDevice(event, device.deviceId);
-      });
+        $("#deviceSelect").append('<option value="' + i + '">'+ device.deviceId + '</option>');
+        i++;
     }
     //console.log(data.BPMResults);
     //console.log(data.OXResults);
