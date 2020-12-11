@@ -1,12 +1,15 @@
-console.log("here");
+
 //let Chart = require('../../node_modules/chart.js');
 if (!window.localStorage.getItem("authToken")) {
     window.location.replace("index.html");
 }
-
-function sendVisualsRequest() {
+let flag = 0;
+let str;
+function sendDailyVisualsRequest() {
+  flag = 0;
+  $("#previewHeader").html("Daily Preview");
     $.ajax({
-        url: '/users/visual',
+        url: '/users/dailyvisual',
         method: 'GET',
         headers: { 'x-auth' : window.localStorage.getItem("authToken") },
         dataType: 'json'
@@ -16,6 +19,12 @@ function sendVisualsRequest() {
 }
 
 function visualSuccess(data, textStatus, jqXHR) {
+  console.log(flag);
+  if (flag == 0){
+    str = "h:mm TT";
+  }else{
+    str = "DDD h:mm TT"
+  }
   let dailyBPMchartValues = [];
   let dailyOXChartValues =[];
   let dayBPMAverage = new Number;
@@ -26,12 +35,9 @@ function visualSuccess(data, textStatus, jqXHR) {
       dailyOXChartValues.push({x:new Date(read.timestamp), y: read.O2reading});
       dayBPMAverage += read.BPMreading;
       dayOXAverage += read.O2reading;
-      let date = new Date(read.timestamp);
-      $("#tableReadings").append("<tr><td>"+date+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
     }
     dayBPMAverage = dayBPMAverage/data.Readings.length;
     dayOXAverage = dayOXAverage/data.Readings.length;
-    $("#Results").show();
   }
   //BPM
   var dailyBPMChart = new CanvasJS.Chart("chartContainer1", {
@@ -50,7 +56,7 @@ function visualSuccess(data, textStatus, jqXHR) {
     },
     data: [{
       yValueFormatString: "###.## BPM",
-      xValueFormatString: "h:mm TT",
+      xValueFormatString: str,
       type: "line",
       lineColor: "red",
       markerColor: "red",
@@ -75,7 +81,7 @@ function visualSuccess(data, textStatus, jqXHR) {
     },
     data: [{
       yValueFormatString: "##.##'%'",
-      xValueFormatString: "h:mm TT",
+      xValueFormatString: str,
       type: "line",
       lineColor: "#0cc288",
       markerColor: "#0cc288",
@@ -84,8 +90,18 @@ function visualSuccess(data, textStatus, jqXHR) {
   });
   dailyOXChart.render();
   $('#main').show();
-    
-
+}
+function sendWeeklyVisualsRequest() {
+  $("#previewHeader").html("Weekly Preview");
+  flag = 1;
+  $.ajax({
+    url: '/users/weeklyvisual',
+    method: 'GET',
+    headers: { 'x-auth' : window.localStorage.getItem("authToken") },
+    dataType: 'json'
+    })
+    .done(visualSuccess)
+    .fail(visualError);
 }
 
 function visualError(jqXHR, textStatus, errorThrown) {
@@ -108,11 +124,13 @@ $(function() {
       window.location.replace("index.html");
     }
     else {
-      sendVisualsRequest();
+      sendDailyVisualsRequest();
+      // Register event listeners
+      $("#dailyView").click(sendDailyVisualsRequest);
+      $("#weeklyView").click(sendWeeklyVisualsRequest);
     }
   
-    // Register event listeners
-    // $("#addDevice").click(showAddDeviceForm);
-    // $("#registerDevice").click(registerDevice);  
+    
+      
     // $("#cancel").click(hideAddDeviceForm);  
 });

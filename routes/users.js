@@ -173,8 +173,8 @@ router.get('/home', function(req, res) {
   }
 });
 
-router.get("/visual", function(req, res){
-  console.log("inside visual");
+router.get("/dailyvisual", function(req, res){
+  console.log("inside dailyvisual");
   if (!req.headers["x-auth"]) {
     res.status(401).json({ success: false, message: "No authentication token."});
     return;
@@ -196,6 +196,44 @@ router.get("/visual", function(req, res){
   let TimeStamp = Math.round(Date.now()/1000.0);
       // last 24hs readings
   Reading.find({userEmail: decodedToken.email, epochTime: {$lt:TimeStamp, $gte:TimeStamp - 86400}},
+                null,{sort: {epochTime: 1}}, function(err,allReadings){
+    if (err) {
+      res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+    }
+    else if (!allReadings){
+      res.status(400).json({ success: false, message: "No readings found"});
+    }
+    else{
+      visualsInfo["success"] = true;
+      visualsInfo["Readings"] = allReadings;
+      res.status(200).json(visualsInfo);
+    }
+  });
+});
+  //weekly visuals
+router.get("/weeklyvisual", function(req, res){
+  console.log("inside Weeklyvisual");
+  if (!req.headers["x-auth"]) {
+    res.status(401).json({ success: false, message: "No authentication token."});
+    return;
+  }
+  //get the authtoken
+  let authToken = req.headers["x-auth"];
+  //creat the info object
+  let visualsInfo = { };
+  let decodedToken;
+  try {
+    // Toaken decoded
+    decodedToken = jwt.decode(authToken, secret);
+  }
+  catch (ex) {
+    // Token was invalid
+    res.status(401).json({ success: false, message: "Invalid authentication token."});
+    return;
+  }
+  let TimeStamp = Math.round(Date.now()/1000.0);
+      // last 7days readings
+  Reading.find({userEmail: decodedToken.email, epochTime: {$lt:TimeStamp, $gte:TimeStamp - 604800}},
                 null,{sort: {epochTime: 1}}, function(err,allReadings){
     if (err) {
       res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
