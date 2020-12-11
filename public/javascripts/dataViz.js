@@ -4,7 +4,6 @@ if (!window.localStorage.getItem("authToken")) {
     window.location.replace("index.html");
 }
 let flag = 0;
-let str;
 function sendDailyVisualsRequest() {
   flag = 0;
   $("#previewHeader").html("Daily Preview");
@@ -19,40 +18,79 @@ function sendDailyVisualsRequest() {
 }
 
 function visualSuccess(data, textStatus, jqXHR) {
-  console.log(flag);
-  if (flag == 0){
-    str = "h:mm TT";
-  }else{
-    str = "DDD h:mm TT"
-  }
+  let str;
+  let subtitle;
+  let minMaxAverageBPM = [];
+  let minMaxAverageOX = [];
   let dailyBPMchartValues = [];
   let dailyOXChartValues =[];
   let dayBPMAverage = new Number;
   let dayOXAverage = new Number;
+  let dayBPMMax = Number.parseInt(0);
+  let dayBPMMin = Number.parseInt(0);
+  let dayOXMax = Number.parseInt(0);
+  let dayOXMin = Number.parseInt(0);
   if(data.Readings.length > 0){
+    dayBPMMin = data.Readings[0].BPMreading;
+    dayOXMin = data.Readings[0].O2reading;
     for (let read of data.Readings){
       dailyBPMchartValues.push({x:new Date(read.timestamp), y: read.BPMreading});
       dailyOXChartValues.push({x:new Date(read.timestamp), y: read.O2reading});
       dayBPMAverage += read.BPMreading;
+      if(dayBPMMax < read.BPMreading ){
+        dayBPMMax = read.BPMreading;
+      }
+      if(dayBPMMin > read.BPMreading){
+        dayBPMMin = read.BPMreading;
+      }
       dayOXAverage += read.O2reading;
+      if(dayOXMax < read.O2reading ){
+        dayOXMax = read.O2reading;
+      }
+      if(dayOXMin > read.O2reading){
+        dayOXMin = read.O2reading;
+      }
     }
     dayBPMAverage = dayBPMAverage/data.Readings.length;
     dayOXAverage = dayOXAverage/data.Readings.length;
   }
-  //BPM
+  
+  if (flag == 0){
+    str = "h:mm TT";
+    subtitle = "Last 24 Hours";
+    minMaxAverageBPM = [{value: dayBPMMax, label: "Maximum",showOnTop: true},
+                        {value: dayBPMMin, label: "Minimum",showOnTop: true}];
+    minMaxAverageOX = [{value: dayOXMax, label: "Maximum",showOnTop: true},
+                       {value: dayOXMin, label: "Minimum",showOnTop: true}]
+  }else{
+    str = "DDD h:mm TT";
+    minMaxAverageBPM = [{value: dayBPMAverage, label: "Average", showOnTop: true},
+                        {value: dayBPMMax, label: "Maximum", showOnTop: true},
+                        {value: dayBPMMin, label: "Minimum",showOnTop: true}];
+    minMaxAverageOX = [{value: dayOXAverage, label: "Average",showOnTop: true},
+                       {value: dayOXMax, label: "Maximum",showOnTop: true},
+                       {value: dayOXMin, label: "Minimum",showOnTop: true}]
+    subtitle = "Last 7 Days";
+  }
   var dailyBPMChart = new CanvasJS.Chart("chartContainer1", {
     animationEnabled: true,  
     title:{
-      text: "Heart Beat Monitor"
+      text: "Heart Beat Monitor",
+      fontFamily: "Geneva"
+    },
+    subtitles:[
+      {text: subtitle,
+       fontFamily: "Geneva"
+      }],
+    axisX:{
+      title: "Time"
     },
     axisY: {
       title: "Beat per Minute",
       valueFormatString: "##0 ",
       suffix: "BPM",
-      stripLines: [{
-        value: dayBPMAverage,
-        label: "Average"
-      }]
+      minimum: 0,
+      stripLines: minMaxAverageBPM
     },
     data: [{
       yValueFormatString: "###.## BPM",
@@ -67,17 +105,25 @@ function visualSuccess(data, textStatus, jqXHR) {
   var dailyOXChart = new CanvasJS.Chart("chartContainer2", {
     animationEnabled: true,  
     title:{
-      text: "Oxygen Level Monitor"
+      text: "Oxygen Level Monitor",
+      fontFamily: "Geneva"
+    },
+    
+    subtitles:[
+      {
+        text: subtitle,
+        fontFamily: "Geneva"
+      }
+      ],
+    axisX:{
+        title: "Time",
     },
     axisY: {
       title: "Percent",
       valueFormatString: "### ",
       maximum: 100,
       suffix: "%",
-      stripLines: [{
-        value: dayOXAverage,
-        label: "Average"
-      }]
+      stripLines: minMaxAverageOX
     },
     data: [{
       yValueFormatString: "##.##'%'",
