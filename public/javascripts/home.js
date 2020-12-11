@@ -1,7 +1,8 @@
 function sendAccountRequest() {
   $.ajax({
-    url: '/users/account',
+    url: '/users/home', //used to be account
     method: 'GET',
+    //async: false, // for testing purposes
     headers: { 'x-auth' : window.localStorage.getItem("authToken") },
     dataType: 'json'
   })
@@ -14,8 +15,7 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
   $('#email').html(data.email);
   $('#fullName').html(data.fullName);
   $('#lastAccess').html(data.lastAccess);
-  $('#main').show();
-
+  console.log(data.devices.length);
   // Add the devices to the list before the list item for the add device button (link)
   for (let device of data.devices) {
     $("#addDeviceForm").before("<li class='collection-item'>ID: " +
@@ -26,19 +26,15 @@ function accountInfoSuccess(data, textStatus, jqXHR) {
       removeDevice(event, device.deviceId);
     });
   }
-  //console.log(data.BPMResults);
-  //console.log(data.OXResults);
-  //console.log(data.BPMResults.length);
   console.log(data.Readings.length);
   if(data.Readings.length > 0){
-    $("#Results").show();
     for (let read of data.Readings){
-      $("#tableReadings").append("<tr><td>"+read.timestamp.toString()+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
+      date = new Date(read.timestamp)
+      $("#tableReadings").append("<tr><td>"+date+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
     }
-    /*for( let i = 0; i< data.BPMResults.length;++i){
-      $("#tableReadings").append("<tr><td>"+data.timestamps[i].toString()+"</td><td>"+data.BPMResults[i]+"</td><td>"+data.OXResults[i]+"</td></tr>");
-    }*/
+    $("#Results").show();
   }
+  $('#main').show();
 }
 
 function accountInfoError(jqXHR, textStatus, errorThrown) {

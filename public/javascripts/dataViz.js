@@ -1,79 +1,159 @@
-console.log("here");
-var Chart = require('chart.js');
+
+//let Chart = require('../../node_modules/chart.js');
 if (!window.localStorage.getItem("authToken")) {
     window.location.replace("index.html");
 }
-
-function sendAccountRequest() {
+let flag = 0;
+function sendDailyVisualsRequest() {
+  flag = 0;
+  $("#previewHeader").html("Daily Preview");
     $.ajax({
-        url: '/users/account',
+        url: '/users/dailyvisual',
         method: 'GET',
         headers: { 'x-auth' : window.localStorage.getItem("authToken") },
         dataType: 'json'
     })
-    .done(accountInfoSuccess)
-    .fail(accountInfoError);
+    .done(visualSuccess)
+    .fail(visualError);
 }
 
-function accountInfoSuccess(data, textStatus, jqXHR) {
-    $('#main').show();
-    let ctx = document.getElementById('bpmChart').getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-    // Add the devices to the list before the list item for the add device button (link)
-    for (let device of data.devices) {
-        $("#addDeviceForm").before("<li class='collection-item'>ID: " +
-        device.deviceId + ", APIKEY: " + device.apikey + " </li>");
+function visualSuccess(data, textStatus, jqXHR) {
+  let str;
+  let subtitle;
+  let minMaxAverageBPM = [];
+  let minMaxAverageOX = [];
+  let dailyBPMchartValues = [];
+  let dailyOXChartValues =[];
+  let dayBPMAverage = new Number;
+  let dayOXAverage = new Number;
+  let dayBPMMax = Number.parseInt(0);
+  let dayBPMMin = Number.parseInt(0);
+  let dayOXMax = Number.parseInt(0);
+  let dayOXMin = Number.parseInt(0);
+  if(data.Readings.length > 0){
+    dayBPMMin = data.Readings[0].BPMreading;
+    dayOXMin = data.Readings[0].O2reading;
+    for (let read of data.Readings){
+      dailyBPMchartValues.push({x:new Date(read.timestamp), y: read.BPMreading});
+      dailyOXChartValues.push({x:new Date(read.timestamp), y: read.O2reading});
+      dayBPMAverage += read.BPMreading;
+      if(dayBPMMax < read.BPMreading ){
+        dayBPMMax = read.BPMreading;
+      }
+      if(dayBPMMin > read.BPMreading){
+        dayBPMMin = read.BPMreading;
+      }
+      dayOXAverage += read.O2reading;
+      if(dayOXMax < read.O2reading ){
+        dayOXMax = read.O2reading;
+      }
+      if(dayOXMin > read.O2reading){
+        dayOXMin = read.O2reading;
+      }
     }
-    console.log(data.BPMResults);
-    console.log(data.OXResults);
-    console.log(data.BPMResults.length);
-    if(data.BPMResults.length>0){
-        $("#Results").show();
-        for( let i = 0; i< data.BPMResults.length;++i){
-        $("#tableReadings").append("<tr><td>"+data.timestamps[i].toString()+"</td><td>"+data.BPMResults[i]+"</td><td>"+data.OXResults[i]+"</td></tr>");
-        }
-    }
+    dayBPMAverage = dayBPMAverage/data.Readings.length;
+    dayOXAverage = dayOXAverage/data.Readings.length;
+  }
+  
+  if (flag == 0){
+    str = "h:mm TT";
+    subtitle = "Last 24 Hours";
+    minMaxAverageBPM = [{value: dayBPMMax, label: "Maximum",showOnTop: true},
+                        {value: dayBPMMin, label: "Minimum",showOnTop: true}];
+    minMaxAverageOX = [{value: dayOXMax, label: "Maximum",showOnTop: true},
+                       {value: dayOXMin, label: "Minimum",showOnTop: true}]
+  }else{
+    str = "DDD h:mm TT";
+    minMaxAverageBPM = [{value: dayBPMAverage, label: "Average", showOnTop: true},
+                        {value: dayBPMMax, label: "Maximum", showOnTop: true},
+                        {value: dayBPMMin, label: "Minimum",showOnTop: true}];
+    minMaxAverageOX = [{value: dayOXAverage, label: "Average",showOnTop: true},
+                       {value: dayOXMax, label: "Maximum",showOnTop: true},
+                       {value: dayOXMin, label: "Minimum",showOnTop: true}]
+    subtitle = "Last 7 Days";
+  }
+  var dailyBPMChart = new CanvasJS.Chart("chartContainer1", {
+    animationEnabled: true,  
+    title:{
+      text: "Heart Beat Monitor",
+      fontFamily: "Geneva"
+    },
+    subtitles:[
+      {text: subtitle,
+       fontFamily: "Geneva"
+      }],
+    axisX:{
+      title: "Time"
+    },
+    axisY: {
+      title: "Beat per Minute",
+      valueFormatString: "##0 ",
+      suffix: "BPM",
+      minimum: 0,
+      stripLines: minMaxAverageBPM
+    },
+    data: [{
+      yValueFormatString: "###.## BPM",
+      xValueFormatString: str,
+      type: "line",
+      lineColor: "red",
+      markerColor: "red",
+      dataPoints: dailyBPMchartValues
+    }]
+  });
+  dailyBPMChart.render();
+  var dailyOXChart = new CanvasJS.Chart("chartContainer2", {
+    animationEnabled: true,  
+    title:{
+      text: "Oxygen Level Monitor",
+      fontFamily: "Geneva"
+    },
+    
+    subtitles:[
+      {
+        text: subtitle,
+        fontFamily: "Geneva"
+      }
+      ],
+    axisX:{
+        title: "Time",
+    },
+    axisY: {
+      title: "Percent",
+      valueFormatString: "### ",
+      maximum: 100,
+      suffix: "%",
+      stripLines: minMaxAverageOX
+    },
+    data: [{
+      yValueFormatString: "##.##'%'",
+      xValueFormatString: str,
+      type: "line",
+      lineColor: "#0cc288",
+      markerColor: "#0cc288",
+      dataPoints: dailyOXChartValues
+    }]
+  });
+  dailyOXChart.render();
+  $('#main').show();
+}
+function sendWeeklyVisualsRequest() {
+  $("#previewHeader").html("Weekly Preview");
+  flag = 1;
+  $.ajax({
+    url: '/users/weeklyvisual',
+    method: 'GET',
+    headers: { 'x-auth' : window.localStorage.getItem("authToken") },
+    dataType: 'json'
+    })
+    .done(visualSuccess)
+    .fail(visualError);
 }
 
-function accountInfoError(jqXHR, textStatus, errorThrown) {
+function visualError(jqXHR, textStatus, errorThrown) {
     // If authentication error, delete the authToken 
     // redirect user to sign-in page (which is index.html)
-    if (jqXHR.status == 401) {
+    if (jqXHR.status == 401) { // it should be 401
         window.localStorage.removeItem("authToken");
         window.location = "index.html";
     } 
@@ -83,44 +163,20 @@ function accountInfoError(jqXHR, textStatus, errorThrown) {
     }
 }
 
-// Registers the specified device with the server.
-function registerDevice() {
-    $.ajax({
-        url: '/devices/register',
-        type: 'POST',
-        headers: { 'x-auth': window.localStorage.getItem("authToken") },  
-        contentType: 'application/json',
-        data: JSON.stringify({ deviceId: $("#deviceId").val() }), 
-        dataType: 'json'
-        })
-        .done(function (data, textStatus, jqXHR) {
-            // Add new device to the device list
-            $("#addDeviceForm").before("<li class='collection-item'>ID: " +
-            $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
-            " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn remove'>Remove</button> " +
-            "</li>");
-            $("#remove-"+$("#deviceId").val()).click(function(event) {
-            removeDevice(event, $("#deviceId").val());
-            });
-            hideAddDeviceForm();
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            let response = JSON.parse(jqXHR.responseText);
-            $("#error").html("Error: " + response.message);
-            $("#error").show();
-        }); 
-}
+
 
 $(function() {
     if (!window.localStorage.getItem("authToken")) {
       window.location.replace("index.html");
     }
     else {
-      sendAccountRequest();
+      sendDailyVisualsRequest();
+      // Register event listeners
+      $("#dailyView").click(sendDailyVisualsRequest);
+      $("#weeklyView").click(sendWeeklyVisualsRequest);
     }
   
-    // Register event listeners
-    $("#addDevice").click(showAddDeviceForm);
-    $("#registerDevice").click(registerDevice);  
-    $("#cancel").click(hideAddDeviceForm);  
+    
+      
+    // $("#cancel").click(hideAddDeviceForm);  
 });

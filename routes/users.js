@@ -74,9 +74,48 @@ router.post('/signin', function(req, res) {
       }
     });
   });
-
-  // Access and Return account information
-router.get('/account', function(req, res) {
+  // router for account page 
+router.get("/account",function(req, res){
+  // check if authtoken exists
+    if (!req.headers["x-auth"]) {
+      res.status(401).json({ success: false, message: "No authentication token."});
+      return;
+    }
+    //get the authtoken
+    let authToken = req.headers["x-auth"];
+    //creat the info object
+    let accountInfo = { };
+    try {
+      // Toaken decoded
+      let decodedToken = jwt.decode(authToken, secret);
+      //find the decoded email in the db
+      console.log(decodedToken.email);
+      User.findOne({email: decodedToken.email}, function(err, user) {
+        if (err) {
+          res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+        }
+        else if (!user){
+          console.log("user is not found");
+          res.status(400).json({ success: false, message: "user is not found"});
+        }
+        else{
+          //if found add info to the object
+          //console.log("user is found");
+          accountInfo["success"] = true;
+          accountInfo["email"] = user.email;
+          accountInfo["fullName"] = user.fullName;
+          accountInfo["lastAccess"] = user.lastAccess;
+          res.status(200).json(accountInfo);
+         }
+      });
+    }
+    catch (ex) {
+      // Token was invalid
+      res.status(401).json({ success: false, message: "Invalid authentication token."});
+    }
+  });
+  // Access and Return account information in home page
+router.get('/home', function(req, res) {
   // check if authtoken exists
   if (!req.headers["x-auth"]) {
     res.status(401).json({ success: false, message: "No authentication token."});
@@ -91,91 +130,123 @@ router.get('/account', function(req, res) {
     // Toaken decoded
     let decodedToken = jwt.decode(authToken, secret);
     //find the decoded email in the db
+    //console.log(decodedToken.email);
     User.findOne({email: decodedToken.email}, function(err, user) {
       if (err) {
-          res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+        res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
       }
-      else {
-        //if found add info to the object 
+      else if (!user){
+        //console.log("user is not found");
+        res.status(400).json({ success: false, message: "user is not found"});
+      }
+      else{
+        //if found add info to the object
+        //console.log("user is found");
+        //console.log(user.getTimestamp().toString());
         accountInfo["success"] = true;
         accountInfo["email"] = user.email;
         accountInfo["fullName"] = user.fullName;
         accountInfo["lastAccess"] = user.lastAccess;
         accountInfo["devices"] = [];// Array of devices
         accountInfo["Readings"]= [];
-        accountInfo["OXResults"] = [];
-        accountInfo["timestamps"] = [];
-        //send info back
-        //res.status(200).json(accountInfo);
-        Reading.find({userEmail: decodedToken.email}, function(err, allReadings){
+        Reading.find({userEmail : decodedToken.email}, function(err, allReadings){
           if(!err){
-            //console.log(allReadings[0].userEmail);
             accountInfo.Readings = allReadings;
-            //console.log(accountInfo.Readings[0].userEmail);
           }
         });
         // Find devices based on decoded token
         Device.find({ userEmail : decodedToken.email}, function(err, devices) {
           if (!err) {
             for (device of devices) {
-              accountInfo['devices'].push({ deviceId: device.deviceId, apikey: device.apikey });
-              /*for(BPMread of device.BPMreadings){
-                accountInfo["BPMResults"].push(BPMread);
-                console.log(BPMread);
-                console.log("bmread loop");
-              }
-              for(OXread of device.O2readings){
-                accountInfo["OXResults"].push(OXread);
-                console.log(OXread);
-                console.log("OXread loop");
-              }*/
-              //accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
-              //accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
-              //accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
-              //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
-              //console.log(device.O2readings[0]+"O2readings array exists");
+              accountInfo["devices"].push({ deviceId: device.deviceId, apikey: device.apikey });
             }
-            for(OXread of device.O2readings){
-              accountInfo["OXResults"].push(OXread);
-              console.log(OXread);
-              console.log("OXread loop");
-            }
-            accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
-            accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
-            accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
-            //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
-            //console.log(device.O2readings[0]+"O2readings array exists");
           }
-          for(OXread of device.O2readings){
-            accountInfo["OXResults"].push(OXread);
-            console.log(OXread);
-            console.log("OXread loop");
-          }
-          //accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
-          //accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
-          //accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
-          //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
-          //console.log(device.O2readings[0]+"O2readings array exists");
+          res.status(200).json(accountInfo);
         });
-        for(OXread of device.O2readings){
-          accountInfo["OXResults"].push(OXread);
-          console.log(OXread);
-          console.log("OXread loop");
-        }
-        accountInfo["BPMResults"] = accountInfo["BPMResults"].concat(device.BPMreadings);
-        accountInfo["OXResults"] = accountInfo["OXResults"].concat(device.O2readings);
-        accountInfo["timestamps"] = accountInfo["timestamps"].concat(device.timestamps);
-        //console.log(device.BPMreadings[0]+"BPMreading sarray exists");
-        //console.log(device.O2readings[0]+"O2readings array exists");
+        //res.status(200).json(accountInfo);
       }
     });
-    //console.log(accountInfo["BPMResults"][0]+"before sending the response");
-    res.status(200).json(accountInfo);
   }
   catch (ex) {
     // Token was invalid
     res.status(401).json({ success: false, message: "Invalid authentication token."});
   }
+});
+
+router.get("/dailyvisual", function(req, res){
+  console.log("inside dailyvisual");
+  if (!req.headers["x-auth"]) {
+    res.status(401).json({ success: false, message: "No authentication token."});
+    return;
+  }
+  //get the authtoken
+  let authToken = req.headers["x-auth"];
+  //creat the info object
+  let visualsInfo = { };
+  let decodedToken;
+  try {
+    // Toaken decoded
+    decodedToken = jwt.decode(authToken, secret);
+  }
+  catch (ex) {
+    // Token was invalid
+    res.status(401).json({ success: false, message: "Invalid authentication token."});
+    return;
+  }
+  let TimeStamp = Math.round(Date.now()/1000.0);
+      // last 24hs readings
+  Reading.find({userEmail: decodedToken.email, epochTime: {$lt:TimeStamp, $gte:TimeStamp - 86400}},
+                null,{sort: {epochTime: 1}}, function(err,allReadings){
+    if (err) {
+      res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+    }
+    else if (!allReadings){
+      res.status(400).json({ success: false, message: "No readings found"});
+    }
+    else{
+      visualsInfo["success"] = true;
+      visualsInfo["Readings"] = allReadings;
+      res.status(200).json(visualsInfo);
+    }
+  });
+});
+  //weekly visuals
+router.get("/weeklyvisual", function(req, res){
+  console.log("inside Weeklyvisual");
+  if (!req.headers["x-auth"]) {
+    res.status(401).json({ success: false, message: "No authentication token."});
+    return;
+  }
+  //get the authtoken
+  let authToken = req.headers["x-auth"];
+  //creat the info object
+  let visualsInfo = { };
+  let decodedToken;
+  try {
+    // Toaken decoded
+    decodedToken = jwt.decode(authToken, secret);
+  }
+  catch (ex) {
+    // Token was invalid
+    res.status(401).json({ success: false, message: "Invalid authentication token."});
+    return;
+  }
+  let TimeStamp = Math.round(Date.now()/1000.0);
+      // last 7days readings
+  Reading.find({userEmail: decodedToken.email, epochTime: {$lt:TimeStamp, $gte:TimeStamp - 604800}},
+                null,{sort: {epochTime: 1}}, function(err,allReadings){
+    if (err) {
+      res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+    }
+    else if (!allReadings){
+      res.status(400).json({ success: false, message: "No readings found"});
+    }
+    else{
+      visualsInfo["success"] = true;
+      visualsInfo["Readings"] = allReadings;
+      res.status(200).json(visualsInfo);
+    }
+  });
 });
 
 router.post('/update', function(req, res) {
@@ -210,6 +281,50 @@ router.post('/update', function(req, res) {
         console.log(user);
       }
     });
+  }
+});
+
+router.post('/changepass', function(req, res){
+  if (!req.headers["x-auth"]) {
+    res.status(401).json({ success: false, message: "No authentication token."});
+    return;
+  }
+  if( !req.body.hasOwnProperty("newPassword")) {
+    res.status(401).json({ success: false, message: "No password!!"});
+    return;
+  }
+  let authToken = req.headers["x-auth"];
+  //creat the info object
+  let accountInfo = { };
+  let decodedToken;
+  try {
+    decodedToken = jwt.decode(authToken, secret);
+    console.log(decodedToken.email);
+    console.log(req.body.newPassword);
+    bcrypt.hash(req.body.newPassword, 10, function(err, hash) {
+      if (err) {
+        res.status(400).json({success : false, message : err.errmsg});  
+      }
+      else {
+        User.update({email: decodedToken.email}, {$set:{passwordHash: hash}}, function(err, user){
+          if(err){
+            res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+            console.log(err.message);
+            return;
+          }else if(!user){
+            res.status(400).json({ success: false, message: "no user found!"});
+          }
+          else{
+            res.status(200).json({success: true, message:"Password has been updated"});
+            console.log(user);
+          }
+        });
+      }
+    });
+  } catch (err) {
+    // Token was invalid
+    res.status(401).json({ success: false, message: "Invalid authentication token."});
+    return;
   }
 });
 

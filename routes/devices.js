@@ -146,10 +146,9 @@ router.post('/report', function(req, res, next){
       newReading.deviceId = device.deviceId;
       newReading.userEmail = device.userEmail;
       newReading.BPMreading = req.body.avgBPM;
-      newReading.O2reading= req.body.avgO2;
-      newReading.timestamp = new Date(req.body.timestamp)
-      //console.log(newReading.BPMreading);
-      //console.log(newReading.O2reading);
+      newReading.O2reading = req.body.avgO2;
+      newReading.timestamp = new Date(req.body.timestamp);
+      newReading.epochTime = Math.floor(newReading.timestamp.getTime()/1000.0);
       newReading.save(function (err, savedReading){
         if(err){
           res.status(401).json({ success: false, message: "Failed to save to data base"});

@@ -3,8 +3,9 @@ let db = require("../db");
 let readingSchema = new db.Schema({
     deviceId:     String,
     userEmail:    String,
-    BPMreading:   String,
-    O2reading:    String,
+    BPMreading:   Number,
+    O2reading:    Number,
+    epochTime:    Number,
     timestamp:    Date
 });
 
