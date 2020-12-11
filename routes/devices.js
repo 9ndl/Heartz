@@ -14,6 +14,7 @@ let Reading = require('../models/reading');
 //let secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
 let secret = "secret";
 //let particleAccessToken = fs.readFileSync(__dirname + '/../../particle_access_token').toString();
+let particleAccessToken = "89d62e2d1b3d434027bdfe6508ea1bfd8eff5c12";
 
 // Function to generate a random apikey consisting of 32 characters
 function getNewApikey() {

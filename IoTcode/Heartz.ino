@@ -4,6 +4,7 @@
 #include "MAX30105.h"
 #include "spo2_algorithm.h"
 #include "BPMMonitorSM.h"
+#include "SaveData.h"
 
 //-------------------------------------------------------------------
 
@@ -12,10 +13,31 @@ using namespace std;
 //-------------------------------------------------------------------
 
 #define ONE_DAY_MILLIS (24 * 60 * 60 * 1000)
-#define THIRTY_MINUTES_MILLIS (1000 * 60 * 30)
 
 unsigned long lastSync = millis();
+SaveData timeData = load();
 
+int reminderInterval(){
+   return (int)(timeData.reminderTime / ONE_MINUTE_MILLIS);
+}
+
+String reminderPeriod(){
+   return "" + timeData.periodStartHour + ":" + timeData.periodStartMinute + "-" + timeData.periodEndHour + ":" + timeData.periodEndMinute;
+}
+
+int setReminderInterval(String interval){
+   int timeInterval;
+   sscanf(interval.c_str(), "%d", &timeInterval);
+   timeData.reminderInterval = timeInterval * ONE_MINUTE_MILLIS;
+   save(timeData);
+   return 0;
+}
+
+int setReminderPeriod(String period){
+   sscanf(period.c_str(), "%d:%d-%d:%d", &(timeData.periodStartHour), &(timeData.periodStartMinute), &(timeData.periodEndHour), &(timeData.periodEndMinute));
+   save(timeData);
+   return 0;
+}
 
 //-------------------------------------------------------------------
 
@@ -71,7 +93,12 @@ void setup() {
    Serial.println("setup webhook");
    // Setup webhook subscribe
    Particle.subscribe("hook-response/bpm", myHandler, MY_DEVICES);
-   Particle.value()
+   
+   Particle.variable("reminderInterval", reminderInterval);
+   Particle.variable("reminderPeriod", reminderPeriod);
+   
+   Particle.function("setReminderInterval", setReminderInterval);
+   Particle.function("setReminderPeriod", setReminderPeriod);
 }
 
 //-------------------------------------------------------------------

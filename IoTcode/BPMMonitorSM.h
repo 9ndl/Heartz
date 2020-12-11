@@ -11,7 +11,6 @@
 //-------------------------------------------------------------------
 using namespace std;
 
-#define THIRTY_MINUTES_MILLIS 1000 * 60 * 30
 //#define THIRTY_MINUTES_MILLIS 1000 * 60 * 2
 //-------------------------------------------------------------------
 class BPMMonitorSM {
