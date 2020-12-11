@@ -24,7 +24,7 @@ BPMMonitorSM::BPMMonitorSM(MAX30105 &mySensor) : heartSensor(mySensor){
 
 //-------------------------------------------------------------------
 
-void BPMMonitorSM::execute() {
+void BPMMonitorSM::execute(SaveData timeData) {
     uint32_t irValue;
     String data = "";
     switch (state) {
@@ -190,7 +190,7 @@ void BPMMonitorSM::execute() {
                 sampleReported = false;
                 firstRemindFlag = false;
             }
-            while((millis() - refTime) < THIRTY_MINUTES_MILLIS){
+            while((millis() - refTime) < timeData.reminderInterval){
                 irValue = heartSensor.getIR();
                 if (irValue >= 5000) {
                     delay(200);
