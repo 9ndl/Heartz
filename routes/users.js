@@ -183,7 +183,7 @@ router.get("/visual", function(req, res){
   let authToken = req.headers["x-auth"];
   //creat the info object
   let visualsInfo = { };
-  let decodedToken
+  let decodedToken;
   try {
     // Toaken decoded
     decodedToken = jwt.decode(authToken, secret);
@@ -194,24 +194,21 @@ router.get("/visual", function(req, res){
     return;
   }
   let TimeStamp = Math.round(Date.now()/1000.0);
-    //console.log(TimeStamp);
-    //let TimeStamp = 
-    //find the decoded email in the db
-    Reading.find({userEmail: decodedToken.email,                  // 24hs
-                  epochTime: {$lt : TimeStamp, $gt : TimeStamp - 86400}}, function(err, allReadings) {
-      if (err) {
-        res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
-      }
-      else if (!allReadings){
-        //console.log("user is not found");
-        res.status(400).json({ success: false, message: "No readings found"});
-      }
-      else{
-        visualsInfo["success"] = true;
-        visualsInfo["Readings"] = allReadings;
-        res.status(200).json(visualsInfo);
-      }
-    });
+      // last 24hs readings
+  Reading.find({userEmail: decodedToken.email, epochTime: {$lt:TimeStamp, $gte:TimeStamp - 86400}},
+                null,{sort: {epochTime: 1}}, function(err,allReadings){
+    if (err) {
+      res.status(400).json({ success: false, message: "Error contacting DB. Please contact support."});
+    }
+    else if (!allReadings){
+      res.status(400).json({ success: false, message: "No readings found"});
+    }
+    else{
+      visualsInfo["success"] = true;
+      visualsInfo["Readings"] = allReadings;
+      res.status(200).json(visualsInfo);
+    }
+  });
 });
 
 router.post('/update', function(req, res) {

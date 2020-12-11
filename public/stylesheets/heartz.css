@@ -14,7 +14,9 @@
 #account {
    padding-top: 5px;
 }
-
+#chartContainer1, #chartContainer2{
+margin: auto;
+}
 #addDeviceForm,#changePasswordForm, #changeNameForm, #main, #error,#failMessage, #failMessage1,#failMessage2,#failMessage3, #Results {
    display: none;
 }

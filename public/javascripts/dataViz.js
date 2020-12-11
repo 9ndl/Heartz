@@ -16,19 +16,74 @@ function sendVisualsRequest() {
 }
 
 function visualSuccess(data, textStatus, jqXHR) {
-    console.log(data.Readings.length);
-    //let todayTime = new Date.now();
-    //let epochTime = Math.floor((new Date(todayTime.getFullYear(),todayTime.getMonth()+1,todayTime.getDate()).getTime())/1000.0);
-    //console.log(epochTime);
+  let dailyBPMchartValues = [];
+  let dailyOXChartValues =[];
+  let dayBPMAverage = new Number;
+  let dayOXAverage = new Number;
   if(data.Readings.length > 0){
     for (let read of data.Readings){
-      //console.log(read.timestamp.getTime());
+      dailyBPMchartValues.push({x:new Date(read.timestamp), y: read.BPMreading});
+      dailyOXChartValues.push({x:new Date(read.timestamp), y: read.O2reading});
+      dayBPMAverage += read.BPMreading;
+      dayOXAverage += read.O2reading;
       let date = new Date(read.timestamp);
       $("#tableReadings").append("<tr><td>"+date+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
     }
+    dayBPMAverage = dayBPMAverage/data.Readings.length;
+    dayOXAverage = dayOXAverage/data.Readings.length;
     $("#Results").show();
   }
-    $('#main').show();
+  //BPM
+  var dailyBPMChart = new CanvasJS.Chart("chartContainer1", {
+    animationEnabled: true,  
+    title:{
+      text: "Heart Beat Monitor"
+    },
+    axisY: {
+      title: "Beat per Minute",
+      valueFormatString: "##0 ",
+      suffix: "BPM",
+      stripLines: [{
+        value: dayBPMAverage,
+        label: "Average"
+      }]
+    },
+    data: [{
+      yValueFormatString: "###.## BPM",
+      xValueFormatString: "h:mm TT",
+      type: "line",
+      lineColor: "red",
+      markerColor: "red",
+      dataPoints: dailyBPMchartValues
+    }]
+  });
+  dailyBPMChart.render();
+  var dailyOXChart = new CanvasJS.Chart("chartContainer2", {
+    animationEnabled: true,  
+    title:{
+      text: "Oxygen Level Monitor"
+    },
+    axisY: {
+      title: "Percent",
+      valueFormatString: "### ",
+      maximum: 100,
+      suffix: "%",
+      stripLines: [{
+        value: dayOXAverage,
+        label: "Average"
+      }]
+    },
+    data: [{
+      yValueFormatString: "##.##'%'",
+      xValueFormatString: "h:mm TT",
+      type: "line",
+      lineColor: "#0cc288",
+      markerColor: "#0cc288",
+      dataPoints: dailyOXChartValues
+    }]
+  });
+  dailyOXChart.render();
+  $('#main').show();
     
 
 }

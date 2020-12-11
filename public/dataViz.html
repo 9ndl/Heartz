@@ -14,7 +14,8 @@
   <!-- Import jQuery -->
   <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  
+  <!--Canvas script-->
+  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
   <link href="./stylesheets/heartz.css" rel="stylesheet">
   <script src="./javascripts/dataViz.js"></script>
   <script src="./javascripts/signout.js"></script>
@@ -55,6 +56,10 @@
           <h5>Daily Preview</h5>
         </li>
         <li class="collection-item" id="dailyData">
+          <div id="chartContainer1" style="height: 300px; width: 90%;"></div>
+          <li class="divider"></li>
+          <li class="divider"></li>
+          <div id="chartContainer2" style="height: 300px; width: 90%;"></div>
         </li>
       </ul>
       <ul class="collection with-header" id="Results">
