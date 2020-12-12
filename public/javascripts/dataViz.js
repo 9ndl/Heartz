@@ -33,6 +33,7 @@ function visualSuccess(data, textStatus, jqXHR) {
   if(data.Readings.length > 0){
     dayBPMMin = data.Readings[0].BPMreading;
     dayOXMin = data.Readings[0].O2reading;
+
     for (let read of data.Readings){
       dailyBPMchartValues.push({x:new Date(read.timestamp), y: read.BPMreading});
       dailyOXChartValues.push({x:new Date(read.timestamp), y: read.O2reading});
