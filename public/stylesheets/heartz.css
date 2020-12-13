@@ -26,11 +26,11 @@
 }*/
 
 .select-dropdown {
-  color: white;
+  color: black;
 }
 
 .select-wrapper .caret {
-   fill: white;
+   fill: black;
 } 
 
 .inline-button {
@@ -49,5 +49,8 @@
   box-shadow: 0 1px 0 0 black;
 }
 
-
+#selectWrapper{
+  margin-top: 20px;
+  width: 350px;
+}
 

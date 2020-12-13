@@ -1,6 +1,6 @@
 function sendAccountRequest() {
     $.ajax({
-        url: '/users/account',
+        url: '/users/home',
         method: 'GET',
         headers: { 'x-auth' : window.localStorage.getItem("authToken") },
         dataType: 'json'
@@ -11,31 +11,20 @@ function sendAccountRequest() {
   
 function accountInfoSuccess(data, textStatus, jqXHR) {
     let date = new Date();
-    $('#email').html(data.email);
-    $('#fullName').html(data.fullName);
-    $('#lastAccess').html(data.lastAccess);
-    $('#main').show();
-    
-    $("#deviceSelect").append('<option value="" disabled selected>Select a Device</option>');
-    // Add the devices to the list before the list item for the add device button (link)
+
     let i = 1;
+    $("#deviceSelect").append('<option class="black-text" value="" disabled selected>Select a Device</option>');
+    //$("#deviceSelect").append('<option value="'+ i + '">Device 1</option>');
+    //$("#deviceSelect").append('<option value="2">Device 1</option>');
+    // Add the devices to the list before the list item for the add device button (link)
+   
     for (let device of data.devices) {
-        $("#deviceSelect").append('<option value="' + i + '">'+ device.deviceId + '</option>');
+        $("#deviceSelect").append('<option class="black-text" value="' + i + '">'+ device.deviceId + '</option>');
         i++;
     }
-    //console.log(data.BPMResults);
-    //console.log(data.OXResults);
-    //console.log(data.BPMResults.length);
-    console.log(data.Readings.length);
-    if(data.Readings.length > 0){
-      $("#Results").show();
-      for (let read of data.Readings){
-        $("#tableReadings").append("<tr><td>"+read.timestamp.toString()+"</td><td>"+read.BPMreading+"</td><td>"+read.O2reading+"</td></tr>");
-      }
-      /*for( let i = 0; i< data.BPMResults.length;++i){
-        $("#tableReadings").append("<tr><td>"+data.timestamps[i].toString()+"</td><td>"+data.BPMResults[i]+"</td><td>"+data.OXResults[i]+"</td></tr>");
-      }*/
-    }
+    $("select").formSelect();
+    $('#main').show();
+    //$(".select-wrapper").prepend('<button id="registerDevice" class="waves-effect waves-light black btn right">Register</button>');
 }
   
 function accountInfoError(jqXHR, textStatus, errorThrown) {
@@ -50,85 +39,45 @@ function accountInfoError(jqXHR, textStatus, errorThrown) {
       $("#error").show();
     }
 }
-  
-  // Registers the specified device with the server.
-function registerDevice() {
-    $.ajax({
-      url: '/devices/register',
-      type: 'POST',
-      headers: { 'x-auth': window.localStorage.getItem("authToken") },  
-      contentType: 'application/json',
-      data: JSON.stringify({ deviceId: $("#deviceId").val() }), 
-      dataType: 'json'
-      })
-        .done(function (data, textStatus, jqXHR) {
-          // Add new device to the device list
-          $("#addDeviceForm").before("<li class='collection-item'>ID: " +
-          $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
-            //" <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn ping'>Ping</button> " +
-            " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn inline-button'>Remove</button> " +
-            "</li>");
-          $("#remove-"+$("#deviceId").val()).click(function(event) {
-            //pingDevice(event, $("#deviceId").val());
-            removeDevice(event, $("#deviceId").val());
-          });
-          hideAddDeviceForm();
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-          let response = JSON.parse(jqXHR.responseText);
-          $("#error").html("Error: " + response.message);
-          $("#error").show();
-        }); 
+
+function selectDevice(){
+    let deviceId = $(".select-dropdown .selected span").html();
+    getDeviceInfo(deviceId);
 }
-  
-function removeDevice(event, deviceId){
+
+function getDeviceInfo(deviceId){
     $.ajax({
-      url: '/devices/deregister',
-      type: 'POST',
-      headers: { 'x-auth': window.localStorage.getItem("authToken") },
-      data: { 'deviceId': deviceId},
-      responseType: 'json',
-      success: function(data, textStatus, jqXHR) {
-        console.log("Device " + deviceId + " has been deregistered");
-      },
-      error: function(jqXHR, textStatus, jqXHR){
-        var response = JSON.parse(jqXHR.responseText);
-        $("#error").html("Error: " + response.message);
-        $("#error").show();
-      }
-    })
-}
-  
-function pingDevice(event, deviceId) {
-    $.ajax({
-        url: '/devices/ping',
+        url: '/devices/info',
         type: 'POST',
-        headers: { 'x-auth': window.localStorage.getItem("authToken") },   
-        data: { 'deviceId': deviceId }, 
+        headers: { 'x-auth': window.localStorage.getItem("authToken") },
+        data: { 'deviceId': deviceId },
         responseType: 'json',
-        success: function (data, textStatus, jqXHR) {
-            console.log("Pinged.");
+        success: function(data, textStatus, jqXHR){
+            $("#deviceID").html(data.deviceId);
+            $("#apiKey").html(data.apiKey);
+            $("#reminderTime").html(data.reminderTime);
+            let startTime = ((parseInt(data.reminderStartHour) + 11) % 12) + ":" + data.reminderStartMinute;
+            if (parseInt(data.reminderStartHour) >= 12){
+                startTime = startTime + "PM";
+            }
+            else{
+                startTime = startTime + "AM";
+            }
+            let endTime = ((parseInt(data.reminderEndHour) + 11) % 12) + ":" + data.reminderEndMinute;
+            if (parseInt(data.reminderEndHour) >= 12){
+                endTime = endTime + "PM";
+            }
+            else{
+                endTime = endTime + "AM";
+            }
+            $("#reminderPeriod").html(startTime + " - " + endTime);
         },
-        error: function(jqXHR, textStatus, errorThrown) {
+        error: function(jqXHR, textStatus, errorThrown){
             var response = JSON.parse(jqXHR.responseText);
             $("#error").html("Error: " + response.message);
             $("#error").show();
         }
-    }); 
-}
-  
-  // Show add device form and hide the add device button (really a link)
-function showAddDeviceForm() {
-    $("#deviceId").val("");          // Clear the input for the device ID
-    $("#addDeviceControl").hide();   // Hide the add device link
-    $("#addDeviceForm").slideDown(); // Show the add device form
-}
-  
-  // Hides the add device form and shows the add device button (link)
-function hideAddDeviceForm() {
-    $("#addDeviceControl").show();   // Hide the add device link
-    $("#addDeviceForm").slideUp();   // Show the add device form
-    $("#error").hide();
+    });
 }
   
 $(function() {
@@ -138,9 +87,11 @@ $(function() {
     else {
       sendAccountRequest();
     }
+
+    $("select").on('change', selectDevice);
   
     // Register event listeners
-    $("#addDevice").click(showAddDeviceForm);
-    $("#registerDevice").click(registerDevice);  
-    $("#cancel").click(hideAddDeviceForm);  
+    //$("#addDevice").click(showAddDeviceForm);
+    //$("#registerDevice").click(registerDevice);  
+    //$("#cancel").click(hideAddDeviceForm);  
 });

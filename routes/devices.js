@@ -201,6 +201,79 @@ router.post('/deregister', function(req, res, next){
     }
   });
 });
+
+router.post('/info', function(req, res, next){
+  let responseJson = {
+    success: false,
+    deviceId: req.body.deviceId,
+    apiKey: "",
+    reminderInterval: 0,
+    reminderStartHour: 0,
+    reminderStartMinute: 0,
+    reminderEndHour: 0,
+    reminderEndMinute: 0,
+    message : ""
+  };
+
+  let deviceExists = false;
+  if( !req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing deviceId.";
+    return res.status(400).json(responseJson);
+  }
+  try {
+    let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+  }
+  catch (ex) {
+    responseJson.message = "Invalid authorization token.";
+    return res.status(400).json(responseJson);
+  }
+
+  Device.findOne({deviceId: req.body.deviceId}, function(err, device){
+    if(err){//error contacting the data base
+      res.status(401).json({ success: false, message: "Can't connect to DB." });
+    }//when the device id doesnt exists in the data base
+    else if(!device){
+      res.status(401).json({ success: false, message: "Device with this ID is not registered in the data base" });
+    }//the device exists and found
+    else{
+      responseJson.apiKey = device.apikey;
+    }
+  });
+
+  superagent
+    .get("https://api.particle.io/v1/devices/" + req.body.deviceId + "/reminderInterval")
+    .query({access_token: particleAccessToken})
+    .then(result => {
+      responseJson.reminderInterval = result.body.reminderInterval;
+    })
+    .catch(error =>{
+      responseJson.message = error.message;
+    });
+  if (responseJson.message === ""){
+    return res.status(400).json(responseJson);
+  }
+  superagent
+    .get("https://api.particle.io/v1/devices/" + req.body.deviceId + "/reminderPeriod")
+    .query({access_token: particleAccessToken})
+    .then(result => {
+      responseJson.success = true;
+      let splitString = result.body.reminderPeriod.split('-');
+      let start = splitString[0].split(':');
+      let end = splitString[1].split(':');
+      responseJson.reminderStartHour = start[0];
+      responseJson.reminderStartMinute = start[1];
+      responseJson.reminderEndHour = end[0];
+      responseJson.reminderEndMinute = end[1];
+    })
+    .catch(error => {
+      responseJson.message = error.message;
+    });
+  if (responseJson.message === ""){
+    return res.status(400).json(responseJson);
+  }
+
+  return res.status(200).json(responseJson);
+});
 /*
 router.post('/ping', function(req, res, next) {
     let responseJson = {
