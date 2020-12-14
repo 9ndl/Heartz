@@ -87,7 +87,10 @@ function getDeviceInfo(deviceId){
             else{
                 endTime = endTime + "AM";
             }
-            $("#reminderPeriod").html(startTime + " - " + endTime);
+            $("#reminderPeriodStart").html(startTime);
+            $("#reminderPeriodEnd").html(endTime);
+
+            //$("#reminderPeriod").html(startTime + " - " + endTime);
         },
         error: function(jqXHR, textStatus, errorThrown){
             var response = JSON.parse(jqXHR.responseText);
@@ -96,6 +99,88 @@ function getDeviceInfo(deviceId){
         }
     });
 }
+
+function changePeriod(){
+    let newDeviceId = $(".select-dropdown .selected span").html();
+
+    let newStartPeriod = $("#newPeriodStart").val();
+    let newEndPeriod = $("#newPeriodEnd").val();
+
+    if (newStartPeriod === ''){
+        newStartPeriod = $("#reminderPeriodStart").text();
+    }
+
+    if (newEndPeriod === ''){
+        newEndPeriod = $("#reminderPeriodEnd").text();
+    }
+
+
+    $.ajax({
+        url: '/devices/setReminderPeriod',
+        type: 'POST',
+        headers: { 'x-auth': window.localStorage.getItem("authToken") },
+        contentType: 'application/json',
+        data: JSON.stringify({ deviceId: newDeviceId, startPeriod: newStartPeriod, endPeriod: newEndPeriod }), 
+        dataType: 'json'
+    })
+        .done(function (data, textStatus, jqXHR) {
+            $("#reminderPeriodStart").html(newStartPeriod);
+            $("#reminderPeriodEnd").html(newEndPeriod);
+            //$("#reminderPeriod").text(newStartPeriod + " - " + newEndPeriod);
+            //hideChangePeriodForm();
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            let response = JSON.parse(jqXHR.responseText);
+            $("#error").html("Error: " + response.message);
+            $("#error").show();
+        }); 
+}
+
+function changeFrequency(){
+    let newReminderInterval = $("#newFrequency").val();
+    let newDeviceId = $(".select-dropdown .selected span").html();
+
+    $.ajax({
+        url: '/devices/setReminderInterval',
+        type: 'POST',
+        headers: { 'x-auth': window.localStorage.getItem("authToken") },
+        contentType: 'application/json',
+        data: JSON.stringify({ deviceId: newDeviceId, reminderInterval: newReminderInterval }), 
+        dataType: 'json'
+    })
+        .done(function (data, textStatus, jqXHR) {
+            $("#reminderTime").text(newReminderInterval + " minutes");
+            //hideChangeFrequencyForm();
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            let response = JSON.parse(jqXHR.responseText);
+            $("#error").html("Error: " + response.message);
+            $("#error").show();
+        }); 
+}
+
+ // Show add device form and hide the add device button (really a link)
+ function showChangeFrequencyForm() {
+    hideChangePeriodForm();
+    $("#newFrequency").val("");          // Clear the input for the device ID
+    $("#changeFrequencyForm").slideDown(); // Show the add device form
+  }
+  
+  // Hides the add device form and shows the add device button (link)
+  function hideChangeFrequencyForm() {
+    $("#changeFrequencyForm").slideUp();   // Show the add device form
+    $("#error").hide();
+  }
+  function showChangePeriodForm(){
+    hideChangeFrequencyForm();
+    $("#newPeriodStart").val(""); 
+    $("#newPeriodEnd").val(""); 
+    $("#changePeriodForm").slideDown();
+  }
+  function hideChangePeriodForm(){
+    $("#changePeriodForm").slideUp();
+    $("#error").hide();
+  }
   
 $(function() {
     if (!window.localStorage.getItem("authToken")) {
@@ -106,9 +191,11 @@ $(function() {
     }
 
     $("select").on('change', selectDevice);
+    $("#savePeriod").click(changePeriod);
+    $("#saveFrequency").click(changeFrequency);
   
-    // Register event listeners
-    //$("#addDevice").click(showAddDeviceForm);
-    //$("#registerDevice").click(registerDevice);  
-    //$("#cancel").click(hideAddDeviceForm);  
+    $("#changeFrequency").click(showChangeFrequencyForm);
+    $("#changePeriod").click(showChangePeriodForm);
+    $("#cancelFrequency").click(hideChangeFrequencyForm);
+    $("#cancelPeriod").click(hideChangePeriodForm);
 });

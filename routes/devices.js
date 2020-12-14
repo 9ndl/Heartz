@@ -240,7 +240,7 @@ router.post('/info', async function(req, res, next){
     }
   });
 
-  temp = await superagent
+  let temp = await superagent
     .get("https://api.particle.io/v1/devices/" + req.body.deviceId + "/reminderInterval")
     .query({access_token: particleAccessToken})
     .then(result => {
@@ -281,6 +281,126 @@ router.post('/info', async function(req, res, next){
   }
   console.log(responseJson);
   return res.status(200).json(responseJson);
+});
+
+router.post('/setReminderPeriod', async function(req, res, next){
+  let responseJson = {
+    success: false,
+    message: ""
+  };
+  console.log(req.body);
+  if(!req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing deviceId.";
+    return res.status(400).json(responseJson);
+  }
+  if(!req.body.hasOwnProperty("startPeriod")) {
+    responseJson.message = "Missing start period.";
+    return res.status(400).json(responseJson);
+  }
+  if(!req.body.hasOwnProperty("endPeriod")) {
+    responseJson.message = "Missing end period.";
+    return res.status(400).json(responseJson);
+  }
+  try {
+    let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+  }
+  catch (ex) {
+    responseJson.message = "Invalid authorization token.";
+    return res.status(400).json(responseJson);
+  }
+  let startTime = req.body.startPeriod.split(' ');
+  let endTime = req.body.endPeriod.split(' ');
+  let timePeriod = "";
+  let start = startTime[0].split(':');
+  let end = endTime[0].split(':');
+  let startHour = 0;
+  let endHour = 0;
+  let startMinute = parseInt(start[1]);
+  let endMinute = parseInt(end[1]);
+  if (startTime[1] === "PM"){
+    startHour = ((parseInt(start[0]) % 12) + 12);
+    //timePeriod = ((parseInt(start[0]) % 12) + 12) + ":" + start[1];
+  }
+  else{
+    startHour = (parseInt(start[0]) % 12);
+    //timePeriod = (parseInt(start[0]) % 12) + ":" + start[1];
+  }
+  timePeriod = startHour + ":" + startMinute + "-";
+  if (endTime[1] === "PM"){
+    endHour = ((parseInt(end[0]) % 12) + 12);
+    //timePeriod = timePeriod + ((parseInt(end[0]) % 12) + 12) + ":" + end[1];
+  }
+  else{
+    endHour = (parseInt(end[0]) % 12)
+    //timePeriod = timePeriod + (parseInt(end[0]) % 12) + ":" + end[1];
+  }
+  timePeriod = timePeriod + endHour + ":" + endMinute;
+
+  if (startHour > endHour){
+    responseJson.message = "Start period begins after end period.";
+    return res.status(400).json(responseJson);
+  }
+  else if (startHour === endHour){
+    if (startMinute > endMinute){
+      responseJson.message = "Start period begins after end period.";
+      return res.status(400).json(responseJson);
+    }
+  }
+
+  let temp = await superagent
+    .post("https://api.particle.io/v1/devices/" + req.body.deviceId + "/setReminderPeriod")
+    .type("form")
+    .send({ access_token: particleAccessToken })
+    .send({ args: timePeriod })
+    .then((res) => {
+      responseJson.message = "received";
+      responseJson.success = true;
+    })
+    .catch((err) => {
+      responseJson.message = err.message;
+      responseJson.success = false;
+    });
+    if (responseJson.success === false){
+      return res.status(400).json(responseJson);
+    }
+    return res.status(200).json(responseJson);
+});
+
+router.post('/setReminderInterval', async function(req, res, next){
+  let responseJson = {
+    success: false,
+    message: ""
+  };
+  if(!req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing deviceId.";
+    return res.status(400).json(responseJson);
+  }
+  try {
+    let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+  }
+  catch (ex) {
+    responseJson.message = "Invalid authorization token.";
+    return res.status(400).json(responseJson);
+  }
+  let timeInterval = req.body.reminderInterval;
+
+  let temp = await superagent
+    .post("https://api.particle.io/v1/devices/" + req.body.deviceId + "/setReminderInterval")
+    .type("form")
+    .send({ access_token: particleAccessToken })
+    .send({ args: timeInterval })
+    .then((res) => {
+      responseJson.message = "received";
+      responseJson.success = true;
+    })
+    .catch((err) => {
+      responseJson.message = err.message;
+      responseJson.success = false;
+    });
+    if (responseJson.success === false){
+      return res.status(400).json(responseJson);
+    }
+    return res.status(200).json(responseJson);
 });
 /*
 router.post('/ping', function(req, res, next) {

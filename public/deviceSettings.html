@@ -66,7 +66,33 @@
         <li class="collection-item">Device ID: <span id="deviceID"></span></li>
         <li class="collection-item">API Key: <span id="apiKey"></span></li>
         <li class="collection-item">Reminder Frequency: <span id="reminderTime"></span></li>
-        <li class="collection-item">Reminder Time Period: <span id="reminderPeriod"></span></li>
+        <li class="collection-item">Reminder Time Period: <span id="reminderPeriodStart"></span> - <span id="reminderPeriodEnd"></span></span></li>
+        <li class="collection-item">Update Device Info
+          <button id="changeFrequency" class="waves-effect waves-light black btn inline-button">Change Reminder Frequency</button>
+          <button id="changePeriod" class="waves-effect waves-light black btn inline-button">Change Reminder Period</button>
+        </li>
+        <li class="collection-item" id="changeFrequencyForm">
+          <label for="newFrequency">Reminder Frequency (minutes):</label>
+          <input type="text" id="newFrequency" name="newFrequency" col="30">
+          <button id="saveFrequency" class="waves-effect waves-light black btn">Save</button> 
+          <button id="cancelFrequency" class="waves-effect waves-light black btn">Cancel</button> 
+        </li>
+        <li class="collection-item" id="changePeriodForm">
+          <div>
+            <span class="inline-input left" id="changePeriodStart">
+              <label for="newPeriodStart">Reminder Period Start Time:</label>
+              <input type="text" id="newPeriodStart" name="newPeriodStart" col="30" class="timepicker">
+            </span>
+            <span class="inline-input right" id="changePeriodEnd">
+              <label for="newPeriodEnd">Reminder Period End Time:</label>
+              <input type="text" id="newPeriodEnd" name="newPeriodEnd" col="30" class="timepicker">
+            </span>
+          </div>
+          <div>
+            <button id="savePeriod" class="waves-effect waves-light black btn">Save</button> 
+            <button id="cancelPeriod" class="waves-effect waves-light black btn">Cancel</button>
+          </div>
+        </li>
       </ul>
       <div class='red-text text-darken-2' id="error"></div>
     </div>
@@ -77,5 +103,6 @@
   <!-- Initialize dropdown menu in materialize -->
   <script>
     $('.dropdown-trigger').dropdown();
+    $('.timepicker').timepicker();
   </script>
 </html>

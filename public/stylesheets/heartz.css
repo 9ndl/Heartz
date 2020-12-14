@@ -17,13 +17,17 @@
 #chartContainer1, #chartContainer2{
   margin: auto;
 }
-#addDeviceForm,#changePasswordForm, #weeklyData, #changeNameForm, #main, #error,#failMessage, #failMessage1,#failMessage2,#failMessage3, #Results, #deviceInfo {
+#addDeviceForm,#changePasswordForm, #weeklyData, #changeNameForm, #main, #error,#failMessage, #failMessage1,#failMessage2,#failMessage3, #Results, #deviceInfo, #changePeriodForm, #changeFrequencyForm {
    display: none;
 }
 /*
 .input-field input {
    color: white;
 }*/
+
+.inline-input{
+  width: 45vw;
+}
 
 .select-dropdown {
   color: black;
