@@ -17,7 +17,7 @@
 #chartContainer1, #chartContainer2{
   margin: auto;
 }
-#addDeviceForm,#changePasswordForm, #weeklyData, #changeNameForm, #main, #error,#failMessage, #failMessage1,#failMessage2,#failMessage3, #Results {
+#addDeviceForm,#changePasswordForm, #weeklyData, #changeNameForm, #main, #error,#failMessage, #failMessage1,#failMessage2,#failMessage3, #Results, #deviceInfo {
    display: none;
 }
 /*

@@ -202,8 +202,8 @@ router.post('/deregister', function(req, res, next){
   });
 });
 
-router.post('/info', function(req, res, next){
-  let responseJson = {
+router.post('/info', async function(req, res, next){
+  var responseJson = {
     success: false,
     deviceId: req.body.deviceId,
     apiKey: "",
@@ -240,38 +240,46 @@ router.post('/info', function(req, res, next){
     }
   });
 
-  superagent
+  temp = await superagent
     .get("https://api.particle.io/v1/devices/" + req.body.deviceId + "/reminderInterval")
     .query({access_token: particleAccessToken})
     .then(result => {
-      responseJson.reminderInterval = result.body.reminderInterval;
+      responseJson.reminderInterval = result.body.result;
     })
     .catch(error =>{
       responseJson.message = error.message;
     });
-  if (responseJson.message === ""){
+  if (responseJson.message != ""){
     return res.status(400).json(responseJson);
   }
-  superagent
+  temp = await superagent
     .get("https://api.particle.io/v1/devices/" + req.body.deviceId + "/reminderPeriod")
     .query({access_token: particleAccessToken})
-    .then(result => {
+    .then(function(result){
       responseJson.success = true;
-      let splitString = result.body.reminderPeriod.split('-');
+      let splitString = result.body.result.split('-');
       let start = splitString[0].split(':');
       let end = splitString[1].split(':');
       responseJson.reminderStartHour = start[0];
       responseJson.reminderStartMinute = start[1];
       responseJson.reminderEndHour = end[0];
       responseJson.reminderEndMinute = end[1];
+      let reminderPeriodJson = {
+        reminderStartHour: start[0],
+        reminderStartMinute: start[1],
+        reminderEndHour: end[0],
+        reminderEndMinute: end[1]
+      }
+      return reminderPeriodJson;
     })
     .catch(error => {
       responseJson.message = error.message;
     });
-  if (responseJson.message === ""){
+  console.log(temp);
+  if (responseJson.message != ""){
     return res.status(400).json(responseJson);
   }
-
+  console.log(responseJson);
   return res.status(200).json(responseJson);
 });
 /*

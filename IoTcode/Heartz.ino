@@ -16,13 +16,16 @@ unsigned long lastSync = millis();
 SaveData timeData = load();   // loads in the saved EEPROM data
 
 int reminderInterval(){ // variable calculation exposed to the cloud, acts as a getter for the amount of time between reminder intervals
-   return (int)(timeData.reminderTime / ONE_MINUTE_MILLIS);
+   return (int)(timeData.reminderInterval / ONE_MINUTE_MILLIS);
 }
 
 // variable calculation exposed to the cloud, acts as a getter for the time period when reminders are active
 // exposes in the format startHour:startMinute-endHour:endMinute
 String reminderPeriod(){   
-   return "" + timeData.periodStartHour + ":" + timeData.periodStartMinute + "-" + timeData.periodEndHour + ":" + timeData.periodEndMinute;
+   char period[15];
+   sprintf(period, "%d:%d-%d:%d", timeData.periodStartHour, timeData.periodStartMinute, timeData.periodEndHour, timeData.periodEndMinute);
+   return period;
+   //return "" + timeData.periodStartHour + ":" + timeData.periodStartMinute + "-" + timeData.periodEndHour + ":" + timeData.periodEndMinute;
 }
 
 // function exposed to the cloud, acts as a setter for the amount of time between reminders
@@ -105,6 +108,7 @@ void setup() {
    //Exposes setReminderInterval and setReminderPeriod functions to the cloud api
    Particle.function("setReminderInterval", setReminderInterval);
    Particle.function("setReminderPeriod", setReminderPeriod);
+   Particle.connect();
 }
 
 //-------------------------------------------------------------------

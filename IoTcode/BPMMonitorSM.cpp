@@ -184,13 +184,16 @@ void BPMMonitorSM::execute(SaveData timeData) {
             state = BPMMonitorSM::S_CheckRemindTime;
             break;
         case BPMMonitorSM::S_CheckRemindTime:
-            Serial.println("RemindLoop");
             if (sampleReported || firstRemindFlag){
-                refTime = millis();
+                Serial.println("Reset tick");
+                tick = 0;
                 sampleReported = false;
                 firstRemindFlag = false;
             }
-            while((millis() - refTime) < timeData.reminderInterval){
+            if (tick >= timeData.reminderInterval / 10){
+                state = S_Reminder;
+            }
+            else{
                 irValue = heartSensor.getIR();
                 if (irValue >= 5000) {
                     delay(200);
@@ -201,7 +204,7 @@ void BPMMonitorSM::execute(SaveData timeData) {
                     }
                 }
             }
-            state = S_Reminder;
+            tick++;
             break;
    }
 }

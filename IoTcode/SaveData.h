@@ -18,6 +18,8 @@
 #define DEFAULT_PERIOD_END_HOUR 22  // 10 PM
 #define DEFAULT_PERIOD_END_MINUTE 0 //10:00 PM
 
+#include "Particle.h"
+
 // Save Data struct
 typedef struct SaveData{
     unsigned char version;  // version number which is used to check whether saved EEPROM values are valid

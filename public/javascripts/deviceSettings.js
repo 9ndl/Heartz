@@ -43,6 +43,7 @@ function accountInfoError(jqXHR, textStatus, errorThrown) {
 function selectDevice(){
     let deviceId = $(".select-dropdown .selected span").html();
     getDeviceInfo(deviceId);
+    $("#deviceInfo").slideDown();
 }
 
 function getDeviceInfo(deviceId){
@@ -55,15 +56,31 @@ function getDeviceInfo(deviceId){
         success: function(data, textStatus, jqXHR){
             $("#deviceID").html(data.deviceId);
             $("#apiKey").html(data.apiKey);
-            $("#reminderTime").html(data.reminderTime);
-            let startTime = ((parseInt(data.reminderStartHour) + 11) % 12) + ":" + data.reminderStartMinute;
+            $("#reminderTime").html(data.reminderInterval + " minutes");
+            let startTime = "";
+            if ((((parseInt(data.reminderStartHour) + 11) % 12) + 1) < 10){
+                startTime = "0";
+            }
+            startTime = startTime + (((parseInt(data.reminderStartHour) + 11) % 12) + 1) + ":";
+            if (parseInt(data.reminderStartMinute) < 10){
+                startTime = startTime + "0";
+            }
+            startTime = startTime + data.reminderStartMinute;
             if (parseInt(data.reminderStartHour) >= 12){
                 startTime = startTime + "PM";
             }
             else{
                 startTime = startTime + "AM";
             }
-            let endTime = ((parseInt(data.reminderEndHour) + 11) % 12) + ":" + data.reminderEndMinute;
+            let endTime = "";
+            if ((((parseInt(data.reminderEndHour) + 11) % 12) + 1) < 10){
+                endTime = "0";
+            }
+            endTime =  endTime + (((parseInt(data.reminderEndHour) + 11) % 12) + 1) + ":";
+            if (parseInt(data.reminderEndMinute) < 10){
+                endTime = endTime + "0";
+            }
+            endTime = endTime + data.reminderEndMinute;
             if (parseInt(data.reminderEndHour) >= 12){
                 endTime = endTime + "PM";
             }
