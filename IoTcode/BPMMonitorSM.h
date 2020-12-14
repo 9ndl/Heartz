@@ -7,11 +7,11 @@
 #include <time.h>
 #include "MAX30105.h"
 #include "spo2_algorithm.h"
+#include "SaveData.h"
 
 //-------------------------------------------------------------------
 using namespace std;
 
-#define THIRTY_MINUTES_MILLIS 1000 * 60 * 30
 //#define THIRTY_MINUTES_MILLIS 1000 * 60 * 2
 //-------------------------------------------------------------------
 class BPMMonitorSM {
@@ -40,7 +40,7 @@ class BPMMonitorSM {
         bool firstRemindFlag;
     public:
         BPMMonitorSM(MAX30105& mySensor);
-        void execute();
+        void execute(SaveData timeData);
         //float getBPM();
 };
 //-------------------------------------------------------------------

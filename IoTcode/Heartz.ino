@@ -4,6 +4,7 @@
 #include "MAX30105.h"
 #include "spo2_algorithm.h"
 #include "BPMMonitorSM.h"
+#include "SaveData.h"
 
 //-------------------------------------------------------------------
 
@@ -11,8 +12,41 @@ using namespace std;
 
 //-------------------------------------------------------------------
 
-#define ONE_DAY_MILLIS (24 * 60 * 60 * 1000)
 unsigned long lastSync = millis();
+SaveData timeData = load();   // loads in the saved EEPROM data
+
+int reminderInterval(){ // variable calculation exposed to the cloud, acts as a getter for the amount of time between reminder intervals
+   return (int)(timeData.reminderInterval / ONE_MINUTE_MILLIS);
+}
+
+// variable calculation exposed to the cloud, acts as a getter for the time period when reminders are active
+// exposes in the format startHour:startMinute-endHour:endMinute
+String reminderPeriod(){   
+   char period[15];
+   sprintf(period, "%d:%d-%d:%d", timeData.periodStartHour, timeData.periodStartMinute, timeData.periodEndHour, timeData.periodEndMinute);
+   return period;
+   //return "" + timeData.periodStartHour + ":" + timeData.periodStartMinute + "-" + timeData.periodEndHour + ":" + timeData.periodEndMinute;
+}
+
+// function exposed to the cloud, acts as a setter for the amount of time between reminders
+int setReminderInterval(String interval){
+   int timeInterval;
+   sscanf(interval.c_str(), "%d", &timeInterval);
+   timeData.reminderInterval = timeInterval * ONE_MINUTE_MILLIS;
+   save(timeData);
+   Serial.print("Saved interval: ");
+   Serial.println(interval);
+   return 0;
+}
+
+// function exposed to the cloud, acts as a setter for the time period when reminders are active
+int setReminderPeriod(String period){
+   sscanf(period.c_str(), "%d:%d-%d:%d", &(timeData.periodStartHour), &(timeData.periodStartMinute), &(timeData.periodEndHour), &(timeData.periodEndMinute));
+   save(timeData);
+   Serial.print("Saved period: ");
+   Serial.println(period);
+   return 0;
+}
 
 //-------------------------------------------------------------------
 
@@ -68,6 +102,13 @@ void setup() {
    Serial.println("setup webhook");
    // Setup webhook subscribe
    Particle.subscribe("hook-response/bpm", myHandler, MY_DEVICES);
+   // Exposes reminderInterval and reminderPeriod variable calculations to the cloud api
+   Particle.variable("reminderInterval", reminderInterval);
+   Particle.variable("reminderPeriod", reminderPeriod);
+   //Exposes setReminderInterval and setReminderPeriod functions to the cloud api
+   Particle.function("setReminderInterval", setReminderInterval);
+   Particle.function("setReminderPeriod", setReminderPeriod);
+   Particle.connect();
 }
 
 //-------------------------------------------------------------------
@@ -81,7 +122,7 @@ void loop() {
 
    if (executeStateMachines) {
       //Serial.println("We good?");
-      bpmSM.execute();
+      bpmSM.execute(timeData);
    }
 }
 

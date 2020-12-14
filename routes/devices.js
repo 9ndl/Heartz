@@ -14,6 +14,7 @@ let Reading = require('../models/reading');
 //let secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
 let secret = "secret";
 //let particleAccessToken = fs.readFileSync(__dirname + '/../../particle_access_token').toString();
+let particleAccessToken = "89d62e2d1b3d434027bdfe6508ea1bfd8eff5c12";
 
 // Function to generate a random apikey consisting of 32 characters
 function getNewApikey() {
@@ -199,6 +200,207 @@ router.post('/deregister', function(req, res, next){
       res.status(201).json({ success: true, message: "Device " + req.body.deviceId + " deregistered"});
     }
   });
+});
+
+router.post('/info', async function(req, res, next){
+  var responseJson = {
+    success: false,
+    deviceId: req.body.deviceId,
+    apiKey: "",
+    reminderInterval: 0,
+    reminderStartHour: 0,
+    reminderStartMinute: 0,
+    reminderEndHour: 0,
+    reminderEndMinute: 0,
+    message : ""
+  };
+
+  let deviceExists = false;
+  if( !req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing deviceId.";
+    return res.status(400).json(responseJson);
+  }
+  try {
+    let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+  }
+  catch (ex) {
+    responseJson.message = "Invalid authorization token.";
+    return res.status(400).json(responseJson);
+  }
+
+  Device.findOne({deviceId: req.body.deviceId}, function(err, device){
+    if(err){//error contacting the data base
+      res.status(401).json({ success: false, message: "Can't connect to DB." });
+    }//when the device id doesnt exists in the data base
+    else if(!device){
+      res.status(401).json({ success: false, message: "Device with this ID is not registered in the data base" });
+    }//the device exists and found
+    else{
+      responseJson.apiKey = device.apikey;
+    }
+  });
+
+  let temp = await superagent
+    .get("https://api.particle.io/v1/devices/" + req.body.deviceId + "/reminderInterval")
+    .query({access_token: particleAccessToken})
+    .then(result => {
+      responseJson.reminderInterval = result.body.result;
+    })
+    .catch(error =>{
+      responseJson.message = error.message;
+    });
+  if (responseJson.message != ""){
+    return res.status(400).json(responseJson);
+  }
+  temp = await superagent
+    .get("https://api.particle.io/v1/devices/" + req.body.deviceId + "/reminderPeriod")
+    .query({access_token: particleAccessToken})
+    .then(function(result){
+      responseJson.success = true;
+      let splitString = result.body.result.split('-');
+      let start = splitString[0].split(':');
+      let end = splitString[1].split(':');
+      responseJson.reminderStartHour = start[0];
+      responseJson.reminderStartMinute = start[1];
+      responseJson.reminderEndHour = end[0];
+      responseJson.reminderEndMinute = end[1];
+      let reminderPeriodJson = {
+        reminderStartHour: start[0],
+        reminderStartMinute: start[1],
+        reminderEndHour: end[0],
+        reminderEndMinute: end[1]
+      }
+      return reminderPeriodJson;
+    })
+    .catch(error => {
+      responseJson.message = error.message;
+    });
+  console.log(temp);
+  if (responseJson.message != ""){
+    return res.status(400).json(responseJson);
+  }
+  console.log(responseJson);
+  return res.status(200).json(responseJson);
+});
+
+router.post('/setReminderPeriod', async function(req, res, next){
+  let responseJson = {
+    success: false,
+    message: ""
+  };
+  console.log(req.body);
+  if(!req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing deviceId.";
+    return res.status(400).json(responseJson);
+  }
+  if(!req.body.hasOwnProperty("startPeriod")) {
+    responseJson.message = "Missing start period.";
+    return res.status(400).json(responseJson);
+  }
+  if(!req.body.hasOwnProperty("endPeriod")) {
+    responseJson.message = "Missing end period.";
+    return res.status(400).json(responseJson);
+  }
+  try {
+    let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+  }
+  catch (ex) {
+    responseJson.message = "Invalid authorization token.";
+    return res.status(400).json(responseJson);
+  }
+  let startTime = req.body.startPeriod.split(' ');
+  let endTime = req.body.endPeriod.split(' ');
+  let timePeriod = "";
+  let start = startTime[0].split(':');
+  let end = endTime[0].split(':');
+  let startHour = 0;
+  let endHour = 0;
+  let startMinute = parseInt(start[1]);
+  let endMinute = parseInt(end[1]);
+  if (startTime[1] === "PM"){
+    startHour = ((parseInt(start[0]) % 12) + 12);
+    //timePeriod = ((parseInt(start[0]) % 12) + 12) + ":" + start[1];
+  }
+  else{
+    startHour = (parseInt(start[0]) % 12);
+    //timePeriod = (parseInt(start[0]) % 12) + ":" + start[1];
+  }
+  timePeriod = startHour + ":" + startMinute + "-";
+  if (endTime[1] === "PM"){
+    endHour = ((parseInt(end[0]) % 12) + 12);
+    //timePeriod = timePeriod + ((parseInt(end[0]) % 12) + 12) + ":" + end[1];
+  }
+  else{
+    endHour = (parseInt(end[0]) % 12)
+    //timePeriod = timePeriod + (parseInt(end[0]) % 12) + ":" + end[1];
+  }
+  timePeriod = timePeriod + endHour + ":" + endMinute;
+
+  if (startHour > endHour){
+    responseJson.message = "Start period begins after end period.";
+    return res.status(400).json(responseJson);
+  }
+  else if (startHour === endHour){
+    if (startMinute > endMinute){
+      responseJson.message = "Start period begins after end period.";
+      return res.status(400).json(responseJson);
+    }
+  }
+
+  let temp = await superagent
+    .post("https://api.particle.io/v1/devices/" + req.body.deviceId + "/setReminderPeriod")
+    .type("form")
+    .send({ access_token: particleAccessToken })
+    .send({ args: timePeriod })
+    .then((res) => {
+      responseJson.message = "received";
+      responseJson.success = true;
+    })
+    .catch((err) => {
+      responseJson.message = err.message;
+      responseJson.success = false;
+    });
+    if (responseJson.success === false){
+      return res.status(400).json(responseJson);
+    }
+    return res.status(200).json(responseJson);
+});
+
+router.post('/setReminderInterval', async function(req, res, next){
+  let responseJson = {
+    success: false,
+    message: ""
+  };
+  if(!req.body.hasOwnProperty("deviceId")) {
+    responseJson.message = "Missing deviceId.";
+    return res.status(400).json(responseJson);
+  }
+  try {
+    let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+  }
+  catch (ex) {
+    responseJson.message = "Invalid authorization token.";
+    return res.status(400).json(responseJson);
+  }
+  let timeInterval = req.body.reminderInterval;
+
+  let temp = await superagent
+    .post("https://api.particle.io/v1/devices/" + req.body.deviceId + "/setReminderInterval")
+    .type("form")
+    .send({ access_token: particleAccessToken })
+    .send({ args: timeInterval })
+    .then((res) => {
+      responseJson.message = "received";
+      responseJson.success = true;
+    })
+    .catch((err) => {
+      responseJson.message = err.message;
+      responseJson.success = false;
+    });
+    if (responseJson.success === false){
+      return res.status(400).json(responseJson);
+    }
+    return res.status(200).json(responseJson);
 });
 /*
 router.post('/ping', function(req, res, next) {
