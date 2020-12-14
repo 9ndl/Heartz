@@ -62,7 +62,7 @@ function registerDevice() {
     })
       .done(function (data, textStatus, jqXHR) {
         // Add new device to the device list
-        $("#addDeviceForm").before("<li class='collection-item'>ID: " +
+        $("#addDeviceForm").before("<li class='collection-item' id='" + $("#deviceId").val() + "'>ID: " +
         $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
           //" <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn ping'>Ping</button> " +
           " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light black btn inline-button'>Remove</button> " +
@@ -70,6 +70,7 @@ function registerDevice() {
         $("#remove-"+$("#deviceId").val()).click(function(event) {
           //pingDevice(event, $("#deviceId").val());
           removeDevice(event, $("#deviceId").val());
+          $("#"+$("#deviceId").val()).remove();
         });
         hideAddDeviceForm();
       })
