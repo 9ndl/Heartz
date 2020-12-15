@@ -31,119 +31,131 @@ void BPMMonitorSM::execute(SaveData timeData) {
         case BPMMonitorSM::S_Init:
             Serial.println("Init");
             digitalWrite(led, LOW);
-            tick = 0;
+            remindTick = 0;
             sampleReported = false;
-            state = BPMMonitorSM::S_ReadSensor;
+            state = BPMMonitorSM::S_FirstRead;
             heartRateHist.clear();
             spo2Hist.clear();
             invalidCount = 0;
+            validCount = 0;
 
             bufferLength = 100; //buffer length of 100 stores 4 seconds of samples running at 25sps
-
-            //read the first 100 samples, and determine the signal range
-            for (int i = 0 ; i < bufferLength ; ++i)
-            {
-                while (heartSensor.available() == false) //do we have new data?
-                heartSensor.check(); //Check the sensor for new data
-
-                redBuffer[i] = heartSensor.getRed();
-                irBuffer[i] = heartSensor.getIR();
-                Serial.print("i: ");
-                Serial.println(i);
-                Serial.print("IR: ");
-                Serial.println(irBuffer[i]);
-                if (irBuffer[i] < 5000){
-                    
-                    Serial.print("i: ");
-                    Serial.println(i);
-                    Serial.print("IR: ");
-                    Serial.println(irBuffer[i]);
-                    Serial.print("invalids: ");
-                    Serial.println(invalidCount);
-                    --i;
-                    ++invalidCount;
-                    if (invalidCount >= 50){
-                        state = S_CheckRemindTime;
-                        Serial.println("No finger detected.");
-                        return;
-                    }
-                }
-                else {
-                    invalidCount = 0;
-                }
-                heartSensor.nextSample(); //We're finished with this sample so move to next sample
-            }
-
-            //calculate heart rate and SpO2 after first 100 samples (first 4 seconds of samples)
-            maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
-            
-            if (validHeartRate && validSPO2){
-                heartRateHist.push_back(heartRate);
-                spo2Hist.push_back(spo2);
-            }
-
             break;
             
-        case BPMMonitorSM::S_ReadSensor:
-            Serial.println("Reading");
-            //Continuously taking samples from MAX30102.  Heart rate and SpO2 are calculated every 1 second
-            //dumping the first 25 sets of samples in the memory and shift the last 75 sets of samples to the top
+        case BPMMonitorSM::S_FirstRead: //read the first 100 samples, and determine the signal range
+            if (validCount >= bufferLength){
+                //calculate heart rate annd blood ox level from the irbuffer and redbuffer
+                maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+
+                //if the heart rate and spo2 are valid, push them to the history
+                if (validHeartRate && validSPO2){
+                    heartRateHist.push_back(heartRate);
+                    spo2Hist.push_back(spo2);
+                }  
+                //move on to normal reads
+                state = S_ReadSensor;
+            }
+            while (heartSensor.available() == false) //do we have new data?
+            heartSensor.check(); //Check the sensor for new data
+
+            //gets a sample of ir and red light data and pushes to buffer
+            redBuffer[validCount] = heartSensor.getRed();
+            irBuffer[validCount] = heartSensor.getIR();
+            Serial.print("validCount: ");
+            Serial.println(validCount);
+            Serial.print("IR: ");
+            Serial.println(irBuffer[validCount]);
+
+            //this is an invalid ir value
+            if (irBuffer[validCount] < 5000){
+                    
+                Serial.print("validCount: ");
+                Serial.println(validCount);
+                Serial.print("IR: ");
+                Serial.println(irBuffer[validCount]);
+                Serial.print("invalids: ");
+                Serial.println(invalidCount);
+                --validCount;
+                ++invalidCount; //tick up the invalid count
+                if (invalidCount >= 50){    //if 50 invalid readings are taken, assume that there is no finger on the sensor
+                    state = S_CheckRemindTime;  //move to remind interval
+                    Serial.println("No finger detected.");
+                    return;
+                }
+            }
+            else {
+                invalidCount = 0;   //finger detected, reset invalid count
+            }
+            heartSensor.nextSample(); //We're finished with this sample so move to next sample
+            ++validCount;   //tick up valid count to keep pushing to buffer
+            break;
+
+        case BPMMonitorSM::S_ReadSensorPrep:
             for (byte i = 25; i < 100; i++)
             {
                 redBuffer[i - 25] = redBuffer[i];
                 irBuffer[i - 25] = irBuffer[i];
             }
-
-            //take 25 sets of samples before recalculating the heart rate.
-            for (byte i = 75; i < 100; i++)
-            {
-                while (heartSensor.available() == false) //do we have new data?
-                    heartSensor.check(); //Check the sensor for new data
-
-                //digitalWrite(readLED, !digitalRead(readLED)); //Blink onboard LED with every data read
-
-                redBuffer[i] = heartSensor.getRed();
-                irBuffer[i] = heartSensor.getIR();
-                if (irBuffer[i] < 5000){
-                    Serial.print("i: ");
-                    Serial.println(i);
-                    Serial.print("IR: ");
-                    Serial.println(irBuffer[i]);
-                    Serial.print("invalids: ");
-                    Serial.println(invalidCount);
-                    --i;
-                    ++invalidCount;
-                    if (invalidCount >= 50){
-                        state = S_CheckRemindTime;
-                        Serial.println("No finger detected.");
-                        return;
-                    }
+            validCount = 75;
+            state = S_ReadSensor;
+            break;
+        case BPMMonitorSM::S_ReadSensor:    //take 25 sets of samples before recalculating the heart rate.
+            if (validCount >= bufferLength){
+                //calculate heart rate annd blood ox level from the irbuffer and redbuffer
+                maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+                
+                //If the heart rate and blood ox levels are valid and there are less than 3 readings in history,
+                //saves the given reading, otherwise the three readings are averaged and reported
+                if (heartRateHist.size() < 3 && validHeartRate && validSPO2){
+                    Serial.println("Saved");
+                    heartRateHist.push_back(heartRate);
+                    spo2Hist.push_back(spo2);
                 }
-                else {
-                    invalidCount = 0;
+                Serial.print("Heart beat detected: ");
+                Serial.print(heartRate);
+                Serial.println(" avgBPM");
+
+                Serial.println("Blood Oxygen Level: ");
+                Serial.print(spo2);
+                Serial.println("%");
+                Serial.println(heartRateHist.size());
+                //if the sample has not been reported and there are 3 readings in history, report average
+                if (heartRateHist.size() == 3 && !sampleReported) {
+                    state = BPMMonitorSM::S_Report;
+                    return;
                 }
-                heartSensor.nextSample(); //We're finished with this sample so move to next sample
-            }
-            maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
-
-            if (heartRateHist.size() < 3 && validHeartRate && validSPO2){
-                Serial.println("Saved");
-                heartRateHist.push_back(heartRate);
-                spo2Hist.push_back(spo2);
-            }
-            Serial.print("Heart beat detected: ");
-            Serial.print(heartRate);
-            Serial.println(" avgBPM");
-
-            Serial.println("Blood Oxygen Level: ");
-            Serial.print(spo2);
-            Serial.println("%");
-            Serial.println(heartRateHist.size());
-            if (heartRateHist.size() == 3 && !sampleReported) {
-                state = BPMMonitorSM::S_Report;
+                state = BPMMonitorSM::S_ReadSensorPrep;
                 return;
             }
-            state = BPMMonitorSM::S_ReadSensor;
+
+            while (heartSensor.available() == false) //do we have new data?
+            heartSensor.check(); //Check the sensor for new data
+
+            //Get new samples of ir and red light values
+            redBuffer[validCount] = heartSensor.getRed();
+            irBuffer[validCount] = heartSensor.getIR();
+
+            //If the ir value is less than 5000, that reading is invalid
+            if (irBuffer[validCount] < 5000){
+                Serial.print("validCount: ");
+                Serial.println(validCount);
+                Serial.print("IR: ");
+                Serial.println(irBuffer[validCount]);
+                Serial.print("invalids: ");
+                Serial.println(invalidCount);
+                --validCount;   //redo reading
+                ++invalidCount; //tick up invalid count
+                if (invalidCount >= 50){    //if 50 invalids are read, there is no finger on the sensor, and we go to remind loop
+                    state = S_CheckRemindTime;
+                    Serial.println("No finger detected.");
+                    return;
+                }
+            }
+            else {
+                invalidCount = 0;   //Finger was detected, reset invalid count
+            }
+            heartSensor.nextSample(); //We're finished with this sample so move to next sample
+            ++validCount;   //tick up valid count
             break;
         case BPMMonitorSM::S_Reminder:
             ++tick2;
@@ -159,16 +171,14 @@ void BPMMonitorSM::execute(SaveData timeData) {
             }
 
             irValue = heartSensor.getIR();
-            if (irValue >= 5000) {
-                delay(200);
+            if (irValue >= 5000) {  //sensed a finger on the sensor
+                delay(200); //debounce
                 irValue = heartSensor.getIR();
-                if (irValue >= 5000){
+                if (irValue >= 5000){   //if the finger is still there, that means we should leave the remind loop
                     state = S_Init;
                     return;
                 }
             }
-            
-            state = BPMMonitorSM::S_Reminder;
             break;
         case BPMMonitorSM::S_Report:
             Serial.println("Report");
@@ -178,19 +188,38 @@ void BPMMonitorSM::execute(SaveData timeData) {
             Serial.println(data);
             // Publish to webhook
             Particle.publish("bpm", data, PRIVATE);
-            sampleReported = true;
+            sampleReported = true;  //put up sampleReported flag
             heartRateHist.clear();
             spo2Hist.clear();
             state = BPMMonitorSM::S_CheckRemindTime;
             break;
         case BPMMonitorSM::S_CheckRemindTime:
-            if (sampleReported || firstRemindFlag){
+            //If the current time is outside of the given reminder time frame,
+            //go to sleep and wait for valid sensor data
+            if (Time.hour() > timeData.periodEndHour || Time.hour() < timeData.periodStartHour){
+                state = S_Sleep;
+                return;
+            }
+            else if (Time.hour() == timeData.periodEndHour){
+                if (Time.minute() >= timeData.periodEndMinute){
+                    state = S_Sleep;
+                    return;
+                }
+            }
+            else if (Time.hour() == timeData.periodStartHour){
+                if (Time.minute() <= timeData.periodStartMinute){
+                    state = S_Sleep;
+                    return;
+                }
+            }
+            if (sampleReported || firstRemindFlag){ //if a sample was reported or the firstRemindFlag is up, do some prep
                 Serial.println("Reset tick");
-                tick = 0;
+                remindTick = 0;
                 sampleReported = false;
                 firstRemindFlag = false;
             }
-            if (tick >= timeData.reminderInterval / 10){
+            //If the remindTick value (each tick represents 10 milliseconds) equals the reminderInterval / 10 then go to remind loop
+            if (remindTick >= timeData.reminderInterval / 10){  
                 state = S_Reminder;
             }
             else{
@@ -204,7 +233,19 @@ void BPMMonitorSM::execute(SaveData timeData) {
                     }
                 }
             }
-            tick++;
+            remindTick++;
+            break;
+        case BPMMonitorSM::S_Sleep:
+            Serial.println("Sleep");
+            irValue = heartSensor.getIR();
+            if (irValue >= 5000) {  //Check to see if valid sensor data is given
+                delay(200); //debounce
+                irValue = heartSensor.getIR();
+                if (irValue >= 5000){
+                    state = S_Init;
+                    return;
+                }
+            }
             break;
    }
 }

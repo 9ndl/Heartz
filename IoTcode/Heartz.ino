@@ -25,15 +25,14 @@ String reminderPeriod(){
    char period[15];
    sprintf(period, "%d:%d-%d:%d", timeData.periodStartHour, timeData.periodStartMinute, timeData.periodEndHour, timeData.periodEndMinute);
    return period;
-   //return "" + timeData.periodStartHour + ":" + timeData.periodStartMinute + "-" + timeData.periodEndHour + ":" + timeData.periodEndMinute;
 }
 
 // function exposed to the cloud, acts as a setter for the amount of time between reminders
 int setReminderInterval(String interval){
    int timeInterval;
-   sscanf(interval.c_str(), "%d", &timeInterval);
-   timeData.reminderInterval = timeInterval * ONE_MINUTE_MILLIS;
-   save(timeData);
+   sscanf(interval.c_str(), "%d", &timeInterval);  //extracts reminder interval from string
+   timeData.reminderInterval = timeInterval * ONE_MINUTE_MILLIS;  //converts value from minutes to milliseconds
+   save(timeData);   //saves the timedata to the EEPROM
    Serial.print("Saved interval: ");
    Serial.println(interval);
    return 0;
@@ -77,9 +76,8 @@ Timer schedulerTimer(10, simpleScheduler);
 
 void setup() {
    Serial.begin(115200);
-   pinMode(D7, OUTPUT);
-   Serial.println("Hello?");
-   Serial.println("ECE 413/513 Photon and MAX30105 Test");
+   pinMode(D7, OUTPUT); //sets up d7 for reminder output pin
+   Serial.println("ECE 413/513 Photon and Heartz Firmware");
 
    // Sensor Initialization:  default I2C port, 400kHz speed
    if (!heartSensor.begin(Wire, I2C_SPEED_FAST)) {
@@ -99,7 +97,7 @@ void setup() {
    // Starts the state machine scheduler timer.
    schedulerTimer.start();
    
-   Serial.println("setup webhook");
+   Serial.println("setup webhook and cloud function");
    // Setup webhook subscribe
    Particle.subscribe("hook-response/bpm", myHandler, MY_DEVICES);
    // Exposes reminderInterval and reminderPeriod variable calculations to the cloud api
@@ -121,7 +119,6 @@ void loop() {
    }
 
    if (executeStateMachines) {
-      //Serial.println("We good?");
       bpmSM.execute(timeData);
    }
 }
