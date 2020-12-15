@@ -31,7 +31,7 @@ void BPMMonitorSM::execute(SaveData timeData) {
         case BPMMonitorSM::S_Init:
             Serial.println("Init");
             digitalWrite(led, LOW);
-            remindTick = 0;
+            //remindTick = 0;
             sampleReported = false;
             state = BPMMonitorSM::S_FirstRead;
             heartRateHist.clear();
