@@ -67,9 +67,9 @@
         <li class="collection-item">API Key: <span id="apiKey"></span></li>
         <li class="collection-item">Reminder Frequency: <span id="reminderTime"></span></li>
         <li class="collection-item">Reminder Time Period: <span id="reminderPeriodStart"></span> - <span id="reminderPeriodEnd"></span></span></li>
-        <li class="collection-item">Update Device Info
-          <button id="changeFrequency" class="waves-effect waves-light black btn inline-button">Change Reminder Frequency</button>
-          <button id="changePeriod" class="waves-effect waves-light black btn inline-button">Change Reminder Period</button>
+        <li class="collection-item">Update Device Info: <br>
+          <button id="changeFrequency" class="waves-effect waves-light black btn">Change Reminder Frequency</button>
+          <button id="changePeriod" class="waves-effect waves-light black btn ">Change Reminder Period</button>
         </li>
         <li class="collection-item" id="changeFrequencyForm">
           <label for="newFrequency">Reminder Frequency (minutes):</label>
@@ -79,14 +79,10 @@
         </li>
         <li class="collection-item" id="changePeriodForm">
           <div>
-            <span class="inline-input left" id="changePeriodStart">
-              <label for="newPeriodStart">Reminder Period Start Time:</label>
-              <input type="text" id="newPeriodStart" name="newPeriodStart" col="30" class="timepicker">
-            </span>
-            <span class="inline-input right" id="changePeriodEnd">
-              <label for="newPeriodEnd">Reminder Period End Time:</label>
-              <input type="text" id="newPeriodEnd" name="newPeriodEnd" col="30" class="timepicker">
-            </span>
+            <label for="newPeriodStart">Reminder Period Start Time:</label>
+            <input type="text" id="newPeriodStart" name="newPeriodStart" col="30" class="timepicker">
+            <label for="newPeriodEnd">Reminder Period End Time:</label>
+            <input type="text" id="newPeriodEnd" name="newPeriodEnd" col="30" class="timepicker">
           </div>
           <div>
             <button id="savePeriod" class="waves-effect waves-light black btn">Save</button> 
