@@ -29,7 +29,7 @@ This is the final project for ECE413 class
 - Link to milestone demonstration video: https://youtu.be/AHiOMYyjRpY
 
 **Final Project**
-- Link to the endpoint server: http://ec2-13-59-133-162.us-east-2.compute.amazonaws.com:3000
+- Link to the endpoint server: http://ec2-18-218-208-128.us-east-2.compute.amazonaws.com:3000
 - Links to the pitch videos: https://youtu.be/xgULdWH52So
 - Link to the demo video: https://youtu.be/g1R_y3XvvE4
 - Login credentials: Email: lyu18@email.arizona.edu; Password: ECE$13heartz
