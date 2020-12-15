@@ -221,6 +221,7 @@ void BPMMonitorSM::execute(SaveData timeData) {
             //If the remindTick value (each tick represents 10 milliseconds) equals the reminderInterval / 10 then go to remind loop
             if (remindTick >= timeData.reminderInterval / 10){  
                 state = S_Reminder;
+                return;
             }
             else{
                 irValue = heartSensor.getIR();
