@@ -15,10 +15,11 @@ using namespace std;
 //#define THIRTY_MINUTES_MILLIS 1000 * 60 * 2
 //-------------------------------------------------------------------
 class BPMMonitorSM {
-    enum State { S_Init, S_CheckRemindTime, S_ReadSensor, S_Report, S_Reminder};
+    enum State { S_Init, S_CheckRemindTime, S_FirstRead, S_ReadSensorPrep, S_ReadSensor, S_Report, S_Reminder, S_Sleep};
     private:
         State state;
-        int tick;
+        long remindTick;
+        int validCount;
         int tick2;
         int led;
         int invalidCount;
