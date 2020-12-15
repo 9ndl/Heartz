@@ -30,8 +30,9 @@ This is the final project for ECE413 class
 
 **Final Project**
 - Link to the endpoint server: http://ec2-13-59-133-162.us-east-2.compute.amazonaws.com:3000
-- Links to the pitch and demonstration videos.  
-- Login credentials: Email: test@email.com; Password: ECE$13heartz
+- Links to the pitch videos: 
+- Link to the demo video: https://youtu.be/g1R_y3XvvE4
+- Login credentials: Email: lyu18@email.arizona.edu; Password: ECE$13heartz
 - Documentation regarding all endpoints
     1. /register: The user is registering a new account all information including email, full name, and password is saved in the database by mongoDB. If there is error at endpoint, 400 message will be sent. If the full name has been created, 201 message will be sent. 
     2. /signin: After the account is created or the user has an exsiting account, the user will be using sign-in page to login into the account. If the endpoint has database connection error, 401 message will be sent. If the user typed the wrong email, 401 message will be sent to tell the user where he got wrong.
